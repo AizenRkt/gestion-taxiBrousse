@@ -1,0 +1,26 @@
+#Lance tous les services définis dans docker-compose.yml en arrière-plan
+docker compose up -d
+
+#Arrête et supprime les conteneurs (sans supprimer les volumes)
+docker compose down
+
+#Redémarrer les services
+docker compose restart
+
+#Rebuild les images avant de relancer les services
+docker compose up -d --build
+
+#lister les containers actifs
+docker ps
+
+#Accès terminale (utile pour debug).
+docker exec -it gestion-taxiBrousse-postgres bash
+
+#Accès base 
+docker exec -it gestion-taxiBrousse-postgres psql -U taxi_user -d taxi_db
+
+
+#importer et exporter une image
+docker save -o postgres17.tar postgres:17
+
+docker load -i postgres17.tar

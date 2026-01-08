@@ -1,0 +1,160 @@
+# 1Connexion à PostgreSQL
+
+# Depuis Docker (mode interactif)
+docker exec -it gestion-taxiBrousse-postgres psql -U taxi_user -d taxi_db
+# -it : mode interactif
+# psql : client PostgreSQL CLI
+# -U taxi_user : utilisateur
+# -d taxi_db : base de données
+
+# Depuis installation locale
+psql -h localhost -U taxi_user -d taxi_db
+# -h : host
+# -U : user
+# -d : database
+
+###############################################################
+# Commandes de navigation dans psql
+
+# \l        → Liste toutes les bases
+# \c dbname → Se connecter à une base
+# \dt       → Liste toutes les tables
+# \du       → Liste tous les utilisateurs / rôles
+# \d table  → Affiche la structure d'une table
+# \q        → Quitter psql
+
+###############################################################
+# Commandes CRUD SQL
+
+# Créer une table
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL
+);
+
+# Insérer des données
+INSERT INTO users (username, email)
+VALUES ('Patrick', 'patrick@example.com');
+
+# Lire / sélectionner les données
+SELECT * FROM users;
+
+# Mettre à jour une donnée
+UPDATE users
+SET email = 'patrick2@example.com'
+WHERE username = 'Patrick';
+
+# Supprimer une donnée
+DELETE FROM users
+WHERE username = 'Patrick';
+
+###############################################################
+# Sauvegarde et restauration
+
+# Sauvegarder la base
+pg_dump -U taxi_user -d taxi_db -F c -f taxi_db_backup.dump
+# -F c : format custom
+# -f : fichier de sortie
+
+# Restaurer une base
+pg_restore -U taxi_user -d taxi_db taxi_db_backup.dump
+
+###############################################################
+# Commandes utiles pour le développement
+
+# Lister les colonnes d'une table
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'users';
+
+# Voir les index
+\di
+
+# Lister les tables et voir les colonnes
+\d
+
+# Exécuter une commande SQL depuis le terminal sans entrer dans psql
+docker exec -it gestion-taxiBrousse-postgres \
+psql -U taxi_user -d taxi_db -c "SELECT * FROM users;"
+
+###############################################################
+# Gestion des conteneurs Docker PostgreSQL
+
+# Lister les conteneurs actifs
+docker ps
+
+# Lister tous les conteneurs
+docker ps -a
+
+# Démarrer un conteneur
+docker start gestion-taxiBrousse-postgres
+
+# Arrêter un conteneur
+docker stop gestion-taxiBrousse-postgres
+
+# Supprimer un conteneur
+docker rm gestion-taxiBrousse-postgres
+
+# Accéder au shell du conteneur
+docker exec -it gestion-taxiBrousse-postgres bash
+
+###############################################################
+# Volumes Docker (données persistantes)
+
+# Lister les volumes
+docker volume ls
+
+# Inspecter un volume
+docker volume inspect gestion-taxiBrousse-postgres-data
+
+# Supprimer un volume
+docker volume rm gestion-taxiBrousse-postgres-data
+
+# Nettoyer les volumes inutilisés
+docker volume prune
+
+###############################################################
+# Réseaux Docker
+
+# Lister les réseaux
+docker network ls
+
+# Inspecter un réseau
+docker network inspect gestion-taxiBrousse-network
+
+# Supprimer un réseau
+docker network rm gestion-taxiBrousse-network
+
+###############################################################
+# Logs et suivi
+
+# Afficher les logs des services docker-compose
+docker compose logs
+
+# Afficher les logs en temps réel
+docker compose logs -f
+
+# Consulter la consommation des ressources
+docker stats
+
+# Inspecter un conteneur
+docker inspect gestion-taxiBrousse-postgres
+
+###############################################################
+# Commandes docker-compose utiles
+
+# Démarrer tous les services (en arrière-plan)
+docker compose up -d
+
+# Arrêter tous les services
+docker compose down
+
+# Redémarrer tous les services
+docker compose restart
+
+# Voir l'état des services
+docker compose ps
+
+# Reconstruire les images puis relancer
+docker compose up -d --build

@@ -8,8 +8,8 @@ services:
     container_name: postgres_db
     environment:
       POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: sampledb
+      POSTGRES_PASSWORD: azerty
+      POSTGRES_DB: gestion
     ports:
       - "5432:5432"
     volumes:
