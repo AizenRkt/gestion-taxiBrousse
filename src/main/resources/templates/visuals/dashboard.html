@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Gestion Taxi Brousse</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" th:href="@{/template/assets/compiled/svg/favicon.svg}" type="image/x-icon">
+
+    <!-- CSS Mazer -->
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app-dark.css}">
+</head>
+
+<body>
+    <script th:src="@{/template/assets/static/js/initTheme.js}"></script>
+    <div id="app">
+
+        <!-- Sidebar dynamique -->
+        <div th:replace="fragments/sidebar :: sidebar"></div>
+
+        <div id="main">
+            <!-- Header -->
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+
+            <!-- Page Heading -->
+            <div class="page-heading">
+                <div class="page-title">
+                    <div class="row">
+                        <div class="col-12 col-md-6 order-md-1 order-last">
+                            <h3>Dashboard</h3>
+                            <p class="text-subtitle text-muted">Bienvenue dans votre gestion de Taxi Brousse</p>
+                        </div>
+                        <div class="col-12 col-md-6 order-md-2 order-first">
+                            <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a th:href="@{/}">Dashboard</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">Mazer</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard cards -->
+                <section class="section">
+                    <div class="row">
+                        <!-- Card 1 : DB Status -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card">
+                                <div class="card-body py-4 px-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar avatar-xl bg-primary me-3">
+                                            <i class="bi bi-database text-white fs-3"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-bold mb-1">Base de données</h5>
+                                            <p class="mb-0" th:text="${dbStatus}">Test de connexion...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 : Exemples -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card">
+                                <div class="card-body py-4 px-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar avatar-xl bg-success me-3">
+                                            <i class="bi bi-truck text-white fs-3"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-bold mb-1">Véhicules</h5>
+                                            <p class="mb-0">Nombre de véhicules disponibles</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3 : Exemples -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card">
+                                <div class="card-body py-4 px-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar avatar-xl bg-warning me-3">
+                                            <i class="bi bi-people text-white fs-3"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="font-bold mb-1">Chauffeurs</h5>
+                                            <p class="mb-0">Nombre de chauffeurs actifs</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Mazer -->
+    <script th:src="@{/template/assets/static/js/components/dark.js}"></script>
+    <script th:src="@{/template/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
+    <script th:src="@{/template/assets/compiled/js/app.js}"></script>
+</body>
+
+</html>
