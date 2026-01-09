@@ -5,15 +5,16 @@ name: gestion-taxiBrousse
 services:
   postgres:
     image: postgres:17
-    container_name: postgres_db
+    container_name: postgres_taxiBrousse
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: azerty
-      POSTGRES_DB: gestion
+      POSTGRES_DB: taxiBrousse
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./bdd:/docker-entrypoint-initdb.d
 
 volumes:
   postgres_data:
