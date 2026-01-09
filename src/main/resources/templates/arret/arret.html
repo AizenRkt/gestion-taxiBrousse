@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Arrêts</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" th:href="@{/template/assets/compiled/svg/favicon.svg}" type="image/x-icon">
+
+    <!-- CSS Mazer -->
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app-dark.css}">
+</head>
+
+<body>
+    <script th:src="@{/template/assets/static/js/initTheme.js}"></script>
+    <div id="app">
+
+        <!-- Sidebar dynamique -->
+        <div th:replace="fragments/sidebar :: sidebar"></div>
+
+        <div id="main">
+            <!-- Header -->
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+
+            <!-- Page Heading -->
+            <div class="page-heading">
+                <div class="page-title">
+                    <div class="row">
+                        <div class="col-12 col-md-6 order-md-1 order-last">
+                            <h3>Gestion des Arrêts</h3>
+                            <p class="text-subtitle text-muted">Ajoutez, modifiez ou supprimez des arrêts</p>
+                        </div>
+                        <div class="col-12 col-md-6 order-md-2 order-first">
+                            <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a th:href="@{/}">Dashboard</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">Arrêts</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table CRUD -->
+                <section class="section">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="card-title">Liste des Arrêts</h4>
+                            <button class="btn btn-primary" onclick="openAddModal()">Ajouter un arrêt</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped" id="arretTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nom</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal ajout/édition -->
+    <div class="modal fade" id="arretModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Ajouter un arrêt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="arretForm">
+                        <input type="hidden" id="arretId">
+                        <div class="mb-3">
+                            <label for="nom" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="nom" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Mazer -->
+    <script th:src="@{/template/assets/static/js/components/dark.js}"></script>
+    <script th:src="@{/template/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
+    <script th:src="@{/template/assets/compiled/js/app.js}"></script>
+
+    <!-- JS CRUD Arrêt -->
+    <script>
+        const apiUrl = '/api/arrets';
+
+        // Charger tous les arrêts
+        async function loadArrets() {
+            const res = await fetch(apiUrl);
+            const arrets = await res.json();
+
+            const tbody = document.querySelector('#arretTable tbody');
+            tbody.innerHTML = '';
+
+            arrets.forEach(a => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${a.idArret}</td>
+                    <td>${a.nom}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="openEditModal(${a.idArret}, '${a.nom}')">Editer</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteArret(${a.idArret})">Supprimer</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Ouvrir modal ajout
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = "Ajouter un arrêt";
+            document.getElementById('arretId').value = '';
+            document.getElementById('nom').value = '';
+            new bootstrap.Modal(document.getElementById('arretModal')).show();
+        }
+
+        // Ouvrir modal édition
+        function openEditModal(id, nom, ville) {
+            document.getElementById('modalTitle').textContent = "Editer l'arrêt";
+            document.getElementById('arretId').value = id;
+            document.getElementById('nom').value = nom;
+            new bootstrap.Modal(document.getElementById('arretModal')).show();
+        }
+
+        // Soumettre formulaire (ajout ou édition)
+        document.getElementById('arretForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const id = document.getElementById('arretId').value;
+            const data = {
+                nom: document.getElementById('nom').value,
+            };
+
+            if (id) {
+                // Edition
+                await fetch(`${apiUrl}/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+            } else {
+                // Ajout
+                await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+            }
+
+            bootstrap.Modal.getInstance(document.getElementById('arretModal')).hide();
+            loadArrets();
+        });
+
+        // Supprimer un arrêt
+        async function deleteArret(id) {
+            if (confirm("Voulez-vous vraiment supprimer cet arrêt ?")) {
+                await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+                loadArrets();
+            }
+        }
+
+        // Initialiser le tableau
+        loadArrets();
+    </script>
+</body>
+
+</html>

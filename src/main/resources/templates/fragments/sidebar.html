@@ -52,7 +52,7 @@
 
                     <li class="sidebar-item" th:classappend="${activePage == 'dashboard'} ? 'active'">
                         <a th:href="@{/}" class="sidebar-link">
-                            <i class="bi bi-send-fill"></i>
+                            <i class="bi bi-browser-safari"></i>
                             <span>Dashboard</span>
                         </a>
                     </li>
@@ -74,6 +74,22 @@
                     </li>
 
                     <li class="sidebar-title">Trajet & Voyage</li>
+
+                    <li class="sidebar-item">
+                        <a th:href="@{/arrets/listing}" class="sidebar-link">
+                            <i class="bi bi-circle-fill"></i>
+                            <span>arrêt</span>
+                        </a>
+                    </li>
+
+
+                    <li class="sidebar-item">
+                        <a th:href="@{/voyages/billets}" class="sidebar-link">
+                            <i class="bi bi-circle-fill"></i>
+                            <span>billets</span>
+                        </a>
+                    </li>
+
 
                     <li class="sidebar-item">
                         <a th:href="@{/}" class="sidebar-link">
