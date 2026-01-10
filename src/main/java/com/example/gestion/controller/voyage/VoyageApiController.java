@@ -1,5 +1,5 @@
 package com.example.gestion.controller.voyage;
-
+import com.example.gestion.dto.VoyageDTO;
 import com.example.gestion.model.Voyage;
 import com.example.gestion.service.voyage.VoyageService;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,7 @@ public class VoyageApiController {
 
     // GET /api/voyages
     @GetMapping
-    public List<Voyage> getAllVoyages() {
+    public List<VoyageDTO> getAllVoyages() {
         return voyageService.getAllVoyages();
     }
 

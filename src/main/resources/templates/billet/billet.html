@@ -136,7 +136,7 @@
     <script th:src="@{/template/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
     <script th:src="@{/template/assets/compiled/js/app.js}"></script>
 
-    <script>
+  <script>
 document.addEventListener("DOMContentLoaded", () => {
     loadVoyages();
 });
@@ -158,11 +158,11 @@ function loadVoyages() {
 
                 const row = `
                     <tr>
-                        <td>${voyage.trajet?.description ?? "—"}</td>
-                        <td>${voyage.trajet?.codeTrajet ?? "—"}</td>
+                        <td>${voyage.depart}</td>
+                        <td>${voyage.arrivee}</td>
                         <td>${dateDepart}</td>
-                        <td>${voyage.vehicule?.immatriculation ?? ""} (${voyage.vehicule?.marque ?? ""})</td>
-                        <td><strong>—</strong></td>
+                        <td>${voyage.vehicule}</td>
+                        <td>${voyage.prix.toFixed(2)} €</td>
                         <td>
                             <button class="btn btn-success btn-sm" onclick="acheterBillet(${voyage.idVoyage})">
                                 Acheter
@@ -189,6 +189,7 @@ function acheterBillet(idVoyage) {
     // plus tard → redirection vers réservation
 }
 </script>
+
 
 
 </body>

@@ -1,5 +1,7 @@
 package com.example.gestion.service.voyage;
-
+import com.example.gestion.dto.VoyageDTO;
+import java.util.stream.Collectors;
+import com.example.gestion.model.TrajetArret;
 import com.example.gestion.model.Voyage;
 import com.example.gestion.repository.voyage.VoyageRepository;
 import org.springframework.stereotype.Service;
@@ -16,9 +18,49 @@ public class VoyageService {
         this.voyageRepository = voyageRepository;
     }
 
-    public List<Voyage> getAllVoyages() {
-        return voyageRepository.findAll();
+    // public List<Voyage> getAllVoyages() {
+    //     return voyageRepository.findAll();
+    // }
+
+  public List<VoyageDTO> getAllVoyages() {
+        return voyageRepository.findAll().stream().map(voyage -> {
+
+            // Départ : arret ordre 1
+            String depart = voyage.getTrajet().getArrets().stream()
+                    .filter(ta -> ta.getOrdre() == 1)
+                    .findFirst()
+                    .map(ta -> ta.getArret().getNom())
+                    .orElse("N/A");
+
+            // Arrivée : arret ordre 2
+            String arrivee = voyage.getTrajet().getArrets().stream()
+                    .filter(ta -> ta.getOrdre() == 2)
+                    .findFirst()
+                    .map(ta -> ta.getArret().getNom())
+                    .orElse("N/A");
+
+            // Véhicule
+            String vehicule = voyage.getVehicule().getImmatriculation() + " (" +
+                              voyage.getVehicule().getMarque() + ")";
+
+            // Prix : si tu veux le total basé sur les réservations
+            double prix = 0.0; // À implémenter si nécessaire
+
+            // Création du DTO
+            VoyageDTO dto = new VoyageDTO();
+            dto.setIdVoyage(voyage.getIdVoyage());
+            dto.setDepart(depart);
+            dto.setArrivee(arrivee);
+            dto.setDateDepart(voyage.getDateDepart());
+            dto.setDateArrivee(voyage.getDateArrivee());
+            dto.setVehicule(vehicule);
+            dto.setPrix(prix);
+
+            return dto;
+        }).collect(Collectors.toList());
     }
+
+
 
     public Optional<Voyage> getVoyageById(Long id) {
         return voyageRepository.findById(id);
