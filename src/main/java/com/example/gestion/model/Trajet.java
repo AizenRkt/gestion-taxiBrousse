@@ -22,6 +22,14 @@ public class Trajet {
     @OrderBy("ordre ASC")
     private List<TrajetArret> arrets;
 
+    public List<TrajetArret> getArrets() {
+        return arrets;
+    }
+
+    public void setArrets(List<TrajetArret> arrets) {
+        this.arrets = arrets;
+    }
+
     public Long getIdTrajet() {
         return idTrajet;
     }

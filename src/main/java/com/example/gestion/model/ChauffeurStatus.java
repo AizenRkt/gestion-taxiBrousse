@@ -1,5 +1,5 @@
 package com.example.gestion.model;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.example.gestion.enums.ChauffeurStatusEnum;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -15,6 +15,7 @@ public class ChauffeurStatus {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "id_chauffeur", nullable = false)
+    @JsonIgnore
     private Chauffeur chauffeur;
 
     @Enumerated(EnumType.STRING)
