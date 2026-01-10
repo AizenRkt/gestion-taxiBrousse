@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des trajets</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" th:href="@{/template/assets/compiled/svg/favicon.svg}" type="image/x-icon">
+
+    <!-- CSS Mazer -->
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app-dark.css}">
+
+    <!-- Datatable & Choices & Toastify -->
+    <link rel="stylesheet" th:href="@{/template/assets/extensions/simple-datatables/style.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/table-datatable.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/extensions/choices.js/public/assets/styles/choices.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/extensions/toastify-js/src/toastify.css}">
+</head>
+
+<body>
+    <script th:src="@{/template/assets/static/js/initTheme.js}"></script>
+    <div id="app">
+
+        <!-- Sidebar dynamique -->
+        <div th:replace="fragments/sidebar :: sidebar"></div>
+
+        <div id="main">
+            <!-- Header -->
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+
+            <!-- Page Heading -->
+            <div class="page-heading">
+                <div class="page-title">
+                    <div class="row">
+                        <div class="col-12 col-md-6 order-md-1 order-last">
+                            <h3>Trajets</h3>
+                            <p class="text-subtitle text-muted">Liste de tous les trajets</p>
+                        </div>
+                        <div class="col-12 col-md-6 order-md-2 order-first text-end">
+                            <a href="/trajets/create" class="btn btn-primary">Créer un itinéraire</a>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="section">
+                    <!-- Filtre multi-ville -->
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <label for="arrets-filter" class="form-label">Filtrer par villes :</label>
+                            <select id="arrets-filter" class="choices form-select multiple-remove" multiple></select>
+                        </div>
+                    </div>
+
+                    <!-- Tableau des trajets -->
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table table-striped" id="table1">
+                                <thead>
+                                    <tr>
+                                        <th>Code trajet</th>
+                                        <th>Description</th>
+                                        <th>Itinéraire (Arrêts)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="trajets-container">
+                                    <!-- Contenu rempli par JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Mazer -->
+    <script th:src="@{/template/assets/static/js/components/dark.js}"></script>
+    <script th:src="@{/template/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
+    <script th:src="@{/template/assets/compiled/js/app.js}"></script>
+
+    <!-- Datatable / Choices / Toastify -->
+    <script th:src="@{/template/assets/extensions/simple-datatables/umd/simple-datatables.js}"></script>
+    <script th:src="@{/template/assets/extensions/choices.js/public/assets/scripts/choices.js}"></script>
+    <script th:src="@{/template/assets/extensions/toastify-js/src/toastify.js}"></script>
+
+    <script>
+        async function initTrajetsPage() {
+            // 1️⃣ Charger les arrêts pour le filtre
+            const arretsRes = await fetch('/api/arrets');
+            const arrets = await arretsRes.json();
+
+            const filterSelect = document.getElementById('arrets-filter');
+            arrets.forEach(a => {
+                const opt = document.createElement('option');
+                opt.value = a.nom;
+                opt.textContent = a.nom;
+                filterSelect.appendChild(opt);
+            });
+
+            const filterChoices = new Choices(filterSelect, { removeItemButton: true });
+
+            // 2️⃣ Charger tous les trajets
+            await loadTrajets();
+
+            // 3️⃣ Filtrer au changement
+            filterSelect.addEventListener('change', async () => {
+                const selected = filterChoices.getValue(true); // tableau des noms
+                await loadTrajets(selected);
+            });
+        }
+
+        async function loadTrajets(villes = []) {
+            let url = '/api/trajets';
+            if (villes.length > 0) {
+                url += '?' + villes.map(v => `arret=${encodeURIComponent(v)}`).join('&');
+            }
+
+            try {
+                const res = await fetch(url);
+                const trajets = await res.json();
+
+                const tbody = document.getElementById('trajets-container');
+                tbody.innerHTML = '';
+
+                trajets.forEach(t => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${t.codeTrajet}</td>
+                        <td>${t.description || ''}</td>
+                        <td>${t.arrets.map(ta => ta.arret.nom).join(' → ')}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                // Re-initialiser DataTable
+                if (window.dataTable) window.dataTable.destroy();
+                window.dataTable = new simpleDatatables.DataTable("#table1");
+            } catch (err) {
+                Toastify({
+                    text: "Erreur serveur : " + err.message,
+                    duration: 4000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                    close: true
+                }).showToast();
+                console.error(err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initTrajetsPage);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,6 @@
+*création d'itinéraire
+    - CRUD arrêt
+    - CRUD trajet
+        - assemblage de plusieurs arrêt
+
+*création de voyage

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Création de Trajet</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" th:href="@{/template/assets/compiled/svg/favicon.svg}" type="image/x-icon">
+
+    <!-- CSS Mazer -->
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app-dark.css}">
+
+    <link rel="stylesheet" th:href="@{/template/assets/extensions/choices.js/public/assets/styles/choices.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/extensions/toastify-js/src/toastify.css}">
+
+</head>
+
+<body>
+    <script th:src="@{/template/assets/static/js/initTheme.js}"></script>
+    <div id="app">
+
+        <!-- Sidebar dynamique -->
+        <div th:replace="fragments/sidebar :: sidebar"></div>
+
+        <div id="main">
+            <!-- Header -->
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+
+            <!-- Page Heading -->
+            <div class="page-heading">
+                <div class="page-title">
+                    <div class="row">
+                        <div class="col-12 col-md-6 order-md-1 order-last">
+                            <h3>Trajets</h3>
+                            <p class="text-subtitle text-muted">Création de trajet et ajout d'arrêts</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulaire création trajet -->
+                <section class="section">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Créer un nouveau trajet</h4>
+                                </div>
+                                <div class="card-body">
+                                    <form id="trajet-form" method="post">
+
+                                        <!-- Code du trajet -->
+                                        <div class="form-group mb-3">
+                                            <label for="code_trajet" class="form-label">Code du trajet</label>
+                                            <input type="text" id="code_trajet" name="code_trajet" class="form-control" placeholder="Ex: T001" required>
+                                        </div>
+
+                                        <!-- Description -->
+                                        <div class="form-group mb-3">
+                                            <label for="description" class="form-label">Description</label>
+                                            <textarea id="description" name="description" class="form-control" rows="3" placeholder="Ex: Trajet principal Antananarivo → Tamatave"></textarea>
+                                        </div>
+
+                                        <!-- Sélection des arrêts avec Choice.js -->
+                                        <div class="form-group mb-3">
+                                            <label for="arrets-select" class="form-label">Choisir les arrêts</label>
+                                            <select id="arrets-select" class="choices form-select multiple-remove" multiple>
+
+                                            </select>
+                                            <small class="form-text text-muted">Maintenez Ctrl (ou Cmd) pour sélectionner plusieurs arrêts.</small>
+                                        </div>
+
+                                        <!-- Tableau drag & drop -->
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">Ordre des arrêts :</label>
+                                            <div id="arrets-list" class="list-group mb-2"></div>
+                                            <small class="form-text text-muted">Glissez-déposez les arrêts pour définir leur ordre.</small>
+                                            <!-- Champ caché pour envoyer l'ordre au serveur -->
+                                            <input type="hidden" name="arretsOrdre" id="arretsOrdre">
+                                        </div>
+
+                                        <div class="d-flex justify-content-end">
+                                            <button type="submit" class="btn btn-primary">Créer le trajet</button>
+                                        </div>
+
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Mazer -->
+    <script th:src="@{/template/assets/static/js/components/dark.js}"></script>
+    <script th:src="@{/template/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
+    <script th:src="@{/template/assets/compiled/js/app.js}"></script>
+
+    <script th:src="@{/template/assets/extensions/choices.js/public/assets/scripts/choices.js}"></script>
+    <script th:src="@{/template/assets/extensions/toastify-js/src/toastify.js}"></script>
+    <script th:src="@{/template/assets/static/js/pages/toastify.js}"></script>
+
+    <script>
+    async function initArretsChoice() {
+        const response = await fetch('/api/arrets');
+        const arrets = await response.json();
+
+        const select = document.getElementById('arrets-select');
+        arrets.forEach(a => {
+            const opt = document.createElement('option');
+            opt.value = a.idArret;
+            opt.textContent = a.nom;
+            select.appendChild(opt);
+        });
+
+        const choices = new Choices(select, { removeItemButton: true });
+
+        choices.passedElement.element.addEventListener('change', () => {
+            updateArretsTable(choices.getValue(true));
+        });
+    }
+
+    function updateArretsTable(ids) {
+        const table = document.getElementById('arrets-list');
+        table.innerHTML = '';
+
+        ids.forEach(id => {
+            const option = document.querySelector(`#arrets-select option[value="${id}"]`);
+            const item = document.createElement('div');
+            item.className = 'list-group-item';
+            item.draggable = true;
+            item.dataset.id = id;
+            item.textContent = option.text;
+            table.appendChild(item);
+        });
+
+        enableDragDrop();
+        updateHiddenField();
+    }
+
+    function enableDragDrop() {
+        const table = document.getElementById('arrets-list');
+        let dragItem = null;
+
+        table.querySelectorAll('.list-group-item').forEach(item => {
+            item.addEventListener('dragstart', e => {
+                dragItem = e.target;
+                e.target.classList.add('dragging');
+            });
+            item.addEventListener('dragend', e => {
+                e.target.classList.remove('dragging');
+                updateHiddenField();
+            });
+        });
+
+        table.addEventListener('dragover', e => {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(table, e.clientY);
+            if (!afterElement) {
+                table.appendChild(dragItem);
+            } else {
+                table.insertBefore(dragItem, afterElement);
+            }
+        });
+    }
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.list-group-item:not(.dragging)')];
+        if(draggableElements.length === 0) return null;
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function updateHiddenField() {
+        const ids = [...document.getElementById('arrets-list').children].map(i => i.dataset.id);
+        document.getElementById('arretsOrdre').value = ids.join(',');
+    }
+
+    document.addEventListener('DOMContentLoaded', initArretsChoice);
+    </script>
+
+    <!-- pour le formulaire -->
+    <script>
+        document.getElementById('trajet-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const codeTrajet = document.getElementById('code_trajet').value;
+            const description = document.getElementById('description').value;
+            const arretsOrdre = document.getElementById('arretsOrdre').value
+                                    .split(',')
+                                    .filter(id => id)
+                                    .map(id => parseInt(id));
+
+            const dto = { codeTrajet, description, arretsOrdre };
+
+            try {
+                const res = await fetch('/api/trajets/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dto)
+                });
+
+                const msg = await res.text();
+
+                if (res.ok) {
+                    Toastify({
+                        text: "validé : " + msg,
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                        close: true
+                    }).showToast();
+
+                    document.getElementById('trajet-form').reset();
+
+                    document.getElementById('arretsOrdre').value = '';
+                } else {
+                    Toastify({
+                        text: "erreur : " + msg,
+                        duration: 4000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                        close: true
+                    }).showToast();
+                }
+            } catch (err) {
+                Toastify({
+                    text: "erreur serveur : " + err.message,
+                    duration: 4000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                    close: true
+                }).showToast();
+                console.error(err);
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>

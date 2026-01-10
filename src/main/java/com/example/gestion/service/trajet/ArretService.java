@@ -31,4 +31,11 @@ public class ArretService {
     public void deleteById(Long id) {
         arretRepository.deleteById(id);
     }
+
+    public Arret updateArret(Long id, Arret arretDetails) {
+        return arretRepository.findById(id).map(arret -> {
+            arret.setNom(arretDetails.getNom());
+            return arretRepository.save(arret);
+        }).orElseThrow(() -> new RuntimeException("Arret non trouvé avec l'id " + id));
+    }
 }

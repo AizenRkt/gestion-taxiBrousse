@@ -2,6 +2,9 @@ package com.example.gestion.model.trajet;
 
 import jakarta.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "trajet_arret")
 public class TrajetArret {

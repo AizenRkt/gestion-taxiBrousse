@@ -45,4 +45,12 @@ public class Trajet {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public List<TrajetArret> getArrets() {
+    return arrets;
+    }
+
+    public void setArrets(List<TrajetArret> arrets) {
+        this.arrets = arrets;
+    }
 }
