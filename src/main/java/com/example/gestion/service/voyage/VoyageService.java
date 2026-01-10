@@ -1,6 +1,7 @@
 package com.example.gestion.service.voyage;
 import com.example.gestion.dto.VoyageDTO;
 import java.util.stream.Collectors;
+import com.example.gestion.dto.TrajetDTO;
 import com.example.gestion.model.TrajetArret;
 import com.example.gestion.model.Voyage;
 import com.example.gestion.repository.voyage.VoyageRepository;
@@ -22,31 +23,63 @@ public class VoyageService {
     //     return voyageRepository.findAll();
     // }
 
-  public List<VoyageDTO> getAllVoyages() {
-        return voyageRepository.findAll().stream().map(voyage -> {
+public List<VoyageDTO> getVoyagesDisponiblesParTrajet(TrajetDTO trajetDTO) {
 
-            // Départ : arret ordre 1
+    return voyageRepository.findAll().stream()
+
+        // 1️⃣ Filtre trajet
+        .filter(voyage -> {
+
+            if (trajetDTO.getIdTrajet() != null) {
+                return voyage.getTrajet().getIdTrajet().equals(trajetDTO.getIdTrajet());
+            }
+
+            String depart = voyage.getTrajet().getArrets().stream()
+                    .filter(ta -> ta.getOrdre() == 1)
+                    .findFirst()
+                    .map(ta -> ta.getArret().getNom())
+                    .orElse(null);
+
+            String arrivee = voyage.getTrajet().getArrets().stream()
+                    .filter(ta -> ta.getOrdre() == 2)
+                    .findFirst()
+                    .map(ta -> ta.getArret().getNom())
+                    .orElse(null);
+
+            if (depart == null || arrivee == null) return false;
+
+            if (!depart.equalsIgnoreCase(trajetDTO.getDepart())) return false;
+            if (!arrivee.equalsIgnoreCase(trajetDTO.getArrivee())) return false;
+
+            return true;
+        })
+
+        // 2️⃣ Filtre date + heure (>= date choisie)
+        .filter(voyage -> {
+            if (trajetDTO.getDateDepart() == null) return true;
+
+            return !voyage.getDateDepart()
+                    .isBefore(trajetDTO.getDateDepart());
+        })
+
+        // 3️⃣ Mapping DTO
+        .map(voyage -> {
+
             String depart = voyage.getTrajet().getArrets().stream()
                     .filter(ta -> ta.getOrdre() == 1)
                     .findFirst()
                     .map(ta -> ta.getArret().getNom())
                     .orElse("N/A");
 
-            // Arrivée : arret ordre 2
             String arrivee = voyage.getTrajet().getArrets().stream()
                     .filter(ta -> ta.getOrdre() == 2)
                     .findFirst()
                     .map(ta -> ta.getArret().getNom())
                     .orElse("N/A");
 
-            // Véhicule
             String vehicule = voyage.getVehicule().getImmatriculation() + " (" +
                               voyage.getVehicule().getMarque() + ")";
 
-            // Prix : si tu veux le total basé sur les réservations
-            double prix = 0.0; // À implémenter si nécessaire
-
-            // Création du DTO
             VoyageDTO dto = new VoyageDTO();
             dto.setIdVoyage(voyage.getIdVoyage());
             dto.setDepart(depart);
@@ -54,7 +87,39 @@ public class VoyageService {
             dto.setDateDepart(voyage.getDateDepart());
             dto.setDateArrivee(voyage.getDateArrivee());
             dto.setVehicule(vehicule);
-            dto.setPrix(prix);
+            dto.setPrix(0.0);
+
+            return dto;
+        })
+
+        .collect(Collectors.toList());
+}
+   public List<VoyageDTO> getAllVoyages() {
+        return voyageRepository.findAll().stream().map(voyage -> {
+
+            String depart = voyage.getTrajet().getArrets().stream()
+                                  .filter(ta -> ta.getOrdre() == 1)
+                                  .findFirst()
+                                  .map(ta -> ta.getArret().getNom())
+                                  .orElse("N/A");
+
+            String arrivee = voyage.getTrajet().getArrets().stream()
+                                   .filter(ta -> ta.getOrdre() == 2)
+                                   .findFirst()
+                                   .map(ta -> ta.getArret().getNom())
+                                   .orElse("N/A");
+
+            String vehicule = voyage.getVehicule().getImmatriculation() + " (" +
+                              voyage.getVehicule().getMarque() + ")";
+
+            VoyageDTO dto = new VoyageDTO();
+            dto.setIdVoyage(voyage.getIdVoyage());
+            dto.setDepart(depart);
+            dto.setArrivee(arrivee);
+            dto.setDateDepart(voyage.getDateDepart());
+            dto.setDateArrivee(voyage.getDateArrivee());
+            dto.setVehicule(vehicule);
+            dto.setPrix(0.0);
 
             return dto;
         }).collect(Collectors.toList());

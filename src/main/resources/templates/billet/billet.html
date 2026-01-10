@@ -53,140 +53,170 @@
                                 <h4 class="card-title">Rechercher un trajet</h4>
                             </div>
                             <div class="card-body">
-                                <form method="GET" action="">
-                                    <div class="row">
+                            <form id="search-form">
+    <div class="row">
+        <div class="col-md-3">
+            <label>Départ</label>
+            <select class="form-select" name="depart">
+                <option value="">-- Choisir --</option>
+            </select>
+        </div>
 
-                                        <div class="col-md-3">
-                                            <label>Départ</label>
-                                            <select class="form-select" name="depart">
-                                                <option value="">-- Choisir --</option>
-                                                <option value="Fasankarana">Fasankarana</option>
-                                                <option value="Antananarivo">Antananarivo</option>
-                                            </select>
-                                        </div>
+        <div class="col-md-3">
+            <label>Arrivée</label>
+            <select class="form-select" name="arrivee">
+                <option value="">-- Choisir --</option>
+            </select>
+        </div>
 
-                                        <div class="col-md-3">
-                                            <label>Arrivée</label>
-                                            <select class="form-select" name="arrivee">
-                                                <option value="">-- Choisir --</option>
-                                                <option value="Toamasina">Toamasina</option>
-                                                <option value="Mahajanga">Mahajanga</option>
-                                            </select>
-                                        </div>
+        <div class="col-md-3">
+            <label>Date de départ</label>
+            <input type="datetime-local" class="form-control" name="date">
+        </div>
 
-                                        <div class="col-md-3">
-                                            <label>Date de départ</label>
-                                            <input type="datetime-local" class="form-control" name="date">
-                                        </div>
-
-                                        <div class="col-md-3 d-flex align-items-end">
-                                            <button class="btn btn-primary w-100" type="submit">
-                                                 Rechercher
-                                            </button>
-                                        </div>
-
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ===== Tableau des billets ===== -->
-                <section class="row">
-                    <div class="col-12">
-                        <div class="card">
-
-                            <div class="card-header">
-                                <h4 class="card-title">Résultats</h4>
-                            </div>
-
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Départ</th>
-                                                <th>Arrivée</th>
-                                                <th>Date & Heure</th>
-                                                <th>Voiture</th>
-                                                <th>Prix</th>
-                                                <th>Action</th>
-                                            </tr>
-                                        </thead>
-                                      <tbody id="voyages-table-body">
-    <!-- Contenu injecté par JS -->
-</tbody>
-
-                                    </table>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </section>
-
-            </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button class="btn btn-primary w-100" type="submit">Rechercher</button>
         </div>
     </div>
-</div>
+</form>
 
-    <!-- JS Mazer -->
-    <script th:src="@{/template/assets/static/js/components/dark.js}"></script>
-    <script th:src="@{/template/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
-    <script th:src="@{/template/assets/compiled/js/app.js}"></script>
+<!-- Tableau résultats -->
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Départ</th>
+            <th>Arrivée</th>
+            <th>Date & Heure</th>
+            <th>Voiture</th>
+            <th>Prix</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="voyages-table-body"></tbody>
+</table>
 
-  <script>
+<script>
+let trajets = [];
+
 document.addEventListener("DOMContentLoaded", () => {
+    loadTrajets();
     loadVoyages();
+
+    const form = document.getElementById("search-form");
+    form.addEventListener("submit", e => {
+        e.preventDefault();
+        rechercherVoyages();
+    });
 });
 
-function loadVoyages() {
-    fetch("/api/voyages")
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Erreur lors du chargement des voyages");
-            }
-            return response.json();
-        })
+// Charger les départs / arrivées dynamiquement
+function loadTrajets() {
+    fetch("/api/trajets/depart-arrivee")
+        .then(res => res.json())
         .then(data => {
-            const tbody = document.getElementById("voyages-table-body");
-            tbody.innerHTML = "";
-
-            data.forEach(voyage => {
-                const dateDepart = formatDate(voyage.dateDepart);
-
-                const row = `
-                    <tr>
-                        <td>${voyage.depart}</td>
-                        <td>${voyage.arrivee}</td>
-                        <td>${dateDepart}</td>
-                        <td>${voyage.vehicule}</td>
-                        <td>${voyage.prix.toFixed(2)} €</td>
-                        <td>
-                            <button class="btn btn-success btn-sm" onclick="acheterBillet(${voyage.idVoyage})">
-                                Acheter
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                tbody.insertAdjacentHTML("beforeend", row);
-            });
+            trajets = data;
+            populateDepartOptions();
         })
-        .catch(error => {
-            console.error(error);
-        });
+        .catch(err => console.error(err));
 }
 
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("fr-FR") + " à " +
-           date.toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit' });
+function populateDepartOptions() {
+    const departSelect = document.querySelector("select[name='depart']");
+    departSelect.innerHTML = '<option value="">-- Choisir --</option>';
+    const departs = [...new Set(trajets.map(t => t.depart))];
+    departs.forEach(d => {
+        const option = document.createElement("option");
+        option.value = d;
+        option.textContent = d;
+        departSelect.appendChild(option);
+    });
+
+    departSelect.addEventListener("change", populateArriveeOptions);
+}
+
+function populateArriveeOptions() {
+    const departSelect = document.querySelector("select[name='depart']");
+    const arriveeSelect = document.querySelector("select[name='arrivee']");
+    const selectedDepart = departSelect.value;
+
+    arriveeSelect.innerHTML = '<option value="">-- Choisir --</option>';
+    if (!selectedDepart) return;
+
+    const arrivees = trajets.filter(t => t.depart === selectedDepart)
+                            .map(t => t.arrivee);
+    [...new Set(arrivees)].forEach(a => {
+        const option = document.createElement("option");
+        option.value = a;
+        option.textContent = a;
+        arriveeSelect.appendChild(option);
+    });
+}
+
+// Recherche voyages selon le TrajetDTO
+function rechercherVoyages() {
+    const depart = document.querySelector("select[name='depart']").value;
+    const arrivee = document.querySelector("select[name='arrivee']").value;
+    const date = document.querySelector("input[name='date']").value;
+    let url = `/api/voyages/voyagesDisponibles?depart=${encodeURIComponent(depart)}&arrivee=${encodeURIComponent(arrivee)}&date=${encodeURIComponent(date)}`;
+    fetch(url)
+        .then(res => {
+            if (!res.ok) return [];
+            return res.json();
+        })
+        .then(voyages => {
+            // Sécuriser si l'API renvoie un objet
+            if (!Array.isArray(voyages)) voyages = Object.values(voyages);
+            afficherResultats(voyages);
+        })
+        .catch(err => console.error(err));
+}
+
+function afficherResultats(voyages) {
+    const tbody = document.getElementById("voyages-table-body");
+    tbody.innerHTML = "";
+
+    if (!Array.isArray(voyages) || voyages.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6">Aucun voyage trouvé</td></tr>';
+        return;
+    }
+
+    voyages.forEach(v => {
+        const dateDepart = new Date(v.dateDepart).toLocaleString("fr-FR", { 
+            dateStyle: "short", timeStyle: "short" 
+        });
+        const dateArrivee = new Date(v.dateArrivee).toLocaleString("fr-FR", { 
+            dateStyle: "short", timeStyle: "short" 
+        });
+
+        // S'assurer que prix existe
+        const prix = (v.prix != null) ? Number(v.prix).toFixed(2) : "—";
+
+        const row = `
+            <tr>
+                <td>${v.depart}</td>
+                <td>${v.arrivee}</td>
+                <td>${dateDepart} → ${dateArrivee}</td>
+                <td>${v.vehicule ?? "—"}</td>
+                <td>${prix}</td>
+                <td>
+                    <button class="btn btn-success btn-sm" onclick="acheterBillet(${v.idVoyage})">
+                        Acheter
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.insertAdjacentHTML("beforeend", row);
+    });
+}
+function loadVoyages() {
+    fetch("/api/voyages")  // Sans filtre → tous les voyages
+        .then(res => res.json())
+        .then(data => afficherResultats(data))
+        .catch(err => console.error(err));
 }
 
 function acheterBillet(idVoyage) {
-    alert("Billet pour le voyage ID " + idVoyage);
-    // plus tard → redirection vers réservation
+  window.location.href = `/reservations/confirmationAchat?voyageId=${idVoyage}`;
 }
 </script>
 

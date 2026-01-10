@@ -1,5 +1,5 @@
 package com.example.gestion.controller.trajet;
-
+import com.example.gestion.dto.TrajetDTO;
 import com.example.gestion.model.Trajet;
 import com.example.gestion.service.trajet.TrajetService;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +21,11 @@ public class TrajetApiController {
     @GetMapping
     public List<Trajet> getAllTrajets() {
         return trajetService.getAllTrajets();
+    }
+
+     @GetMapping("/depart-arrivee")
+    public List<TrajetDTO> getDepartArrivee() {
+        return trajetService.getDepartArrivee();
     }
 
     // GET /api/trajets/{id}

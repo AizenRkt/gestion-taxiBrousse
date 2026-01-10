@@ -1,5 +1,6 @@
 package com.example.gestion.service.trajet;
-
+import java.util.stream.Collectors;
+import com.example.gestion.dto.TrajetDTO;
 import com.example.gestion.model.Trajet;
 import com.example.gestion.repository.trajet.TrajetRepository;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,27 @@ public class TrajetService {
     // Récupérer tous les trajets
     public List<Trajet> getAllTrajets() {
         return trajetRepository.findAll();
+    }
+
+     public List<TrajetDTO> getDepartArrivee() {
+        return trajetRepository.findAll().stream().map(trajet -> {
+            String depart = trajet.getArrets().stream()
+                                  .filter(ta -> ta.getOrdre() == 1)
+                                  .findFirst()
+                                  .map(ta -> ta.getArret().getNom())
+                                  .orElse("N/A");
+
+            String arrivee = trajet.getArrets().stream()
+                                   .filter(ta -> ta.getOrdre() == 2)
+                                   .findFirst()
+                                   .map(ta -> ta.getArret().getNom())
+                                   .orElse("N/A");
+            TrajetDTO dto = new TrajetDTO();
+            dto.setIdTrajet(trajet.getIdTrajet());
+            dto.setDepart(depart);
+            dto.setArrivee(arrivee);    
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     // Récupérer un trajet par id
