@@ -1,4 +1,4 @@
-package com.example.gestion.model;
+package com.example.gestion.model.trajet;
 
 import jakarta.persistence.*;
 

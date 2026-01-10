@@ -1,4 +1,4 @@
-package com.example.gestion.model;
+package com.example.gestion.model.chauffeur;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;

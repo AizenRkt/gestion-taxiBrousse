@@ -1,10 +1,10 @@
-package com.example.gestion.model;
+package com.example.gestion.model.vehicule;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.example.gestion.model.VehiculeStatus;
+import com.example.gestion.model.vehicule.VehiculeStatus;
 
 @Entity
 @Table(name = "vehicule")

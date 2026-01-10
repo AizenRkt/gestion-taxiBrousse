@@ -1,4 +1,4 @@
-package com.example.gestion.enums;
+package com.example.gestion.enums.vehicule;
 
 public enum VehiculeStatusEnum {
     actif,

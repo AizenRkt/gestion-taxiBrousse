@@ -1,6 +1,6 @@
-package com.example.gestion.model;
+package com.example.gestion.model.vehicule;
 
-import com.example.gestion.enums.VehiculeStatusEnum;
+import com.example.gestion.enums.vehicule.VehiculeStatusEnum;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
