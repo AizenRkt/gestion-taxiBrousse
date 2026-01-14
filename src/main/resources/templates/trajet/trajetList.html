@@ -44,23 +44,64 @@
                             <p class="text-subtitle text-muted">Liste de tous les trajets</p>
                         </div>
                         <div class="col-12 col-md-6 order-md-2 order-first text-end">
-                            <a href="/trajets/create" class="btn btn-primary">Créer un itinéraire</a>
+                            <a href="/trajets/create" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>Créer un itinéraire
+                            </a>
                         </div>
                     </div>
                 </div>
 
                 <section class="section">
                     <!-- Filtre multi-ville -->
-                    <div class="card mb-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Filtrer les trajets</h4>
+                        </div>
                         <div class="card-body">
-                            <label for="arrets-filter" class="form-label">Filtrer par villes :</label>
-                            <select id="arrets-filter" class="choices form-select multiple-remove" multiple></select>
+                            <div class="row align-items-end">
+                                <div class="col-md-7 col-12 mb-3 mb-md-0">
+                                    <div class="form-group">
+                                        <label for="arrets-filter" class="form-label">Sélectionner les villes</label>
+                                        <select id="arrets-filter" class="choices form-select multiple-remove" multiple>
+                                            <!-- Options chargées dynamiquement -->
+                                        </select>
+                                        <small class="text-muted">Sélectionnez une ou plusieurs villes pour filtrer les trajets</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-12">
+                                    <div class="form-group">
+                                        <button id="btn-filter" class="btn btn-primary w-100">
+                                            <i class="bi bi-funnel me-1"></i>Filtrer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-2" id="filter-info" style="display: none;">
+                                <div class="col-12">
+                                    <div class="alert alert-light-info">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        <span id="filter-count">0</span> trajet(s) trouvé(s)
+                                        <button id="btn-reset" class="btn btn-sm btn-light-secondary float-end">
+                                            <i class="bi bi-x-circle me-1"></i>Réinitialiser
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Tableau des trajets -->
                     <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Liste des trajets</h4>
+                        </div>
                         <div class="card-body">
+                            <div id="loading-spinner" class="text-center py-5" style="display: none;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Chargement...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Chargement des trajets...</p>
+                            </div>
                             <table class="table table-striped" id="table1">
                                 <thead>
                                     <tr>
@@ -91,72 +132,163 @@
     <script th:src="@{/template/assets/extensions/toastify-js/src/toastify.js}"></script>
 
     <script>
+        let filterChoices;
+        let dataTable;
+
         async function initTrajetsPage() {
-            // 1️⃣ Charger les arrêts pour le filtre
-            const arretsRes = await fetch('/api/arrets');
-            const arrets = await arretsRes.json();
+            try {
+                // 1️⃣ Charger les arrêts pour le filtre
+                const arretsRes = await fetch('/api/arrets');
+                const arrets = await arretsRes.json();
 
-            const filterSelect = document.getElementById('arrets-filter');
-            arrets.forEach(a => {
-                const opt = document.createElement('option');
-                opt.value = a.nom;
-                opt.textContent = a.nom;
-                filterSelect.appendChild(opt);
-            });
+                const filterSelect = document.getElementById('arrets-filter');
+                arrets.forEach(a => {
+                    const opt = document.createElement('option');
+                    opt.value = a.nom;
+                    opt.textContent = a.nom;
+                    filterSelect.appendChild(opt);
+                });
 
-            const filterChoices = new Choices(filterSelect, { removeItemButton: true });
+                // Initialiser Choices.js avec options personnalisées
+                filterChoices = new Choices(filterSelect, {
+                    removeItemButton: true,
+                    searchEnabled: true,
+                    searchPlaceholderValue: 'Rechercher une ville...',
+                    noResultsText: 'Aucune ville trouvée',
+                    itemSelectText: 'Cliquez pour sélectionner',
+                    placeholderValue: 'Sélectionnez des villes',
+                    maxItemCount: -1,
+                });
 
-            // 2️⃣ Charger tous les trajets
-            await loadTrajets();
+                // 2️⃣ Charger tous les trajets au départ
+                await loadTrajets();
 
-            // 3️⃣ Filtrer au changement
-            filterSelect.addEventListener('change', async () => {
-                const selected = filterChoices.getValue(true); // tableau des noms
-                await loadTrajets(selected);
-            });
+                // 3️⃣ Event listeners
+                const btnFilter = document.getElementById('btn-filter');
+                btnFilter.addEventListener('click', async () => {
+                    const selected = filterChoices.getValue(true);
+                    await loadTrajets(selected);
+                });
+
+                const btnReset = document.getElementById('btn-reset');
+                btnReset.addEventListener('click', async () => {
+                    filterChoices.removeActiveItems();
+                    await loadTrajets();
+                    document.getElementById('filter-info').style.display = 'none';
+                });
+
+            } catch (err) {
+                showError("Erreur d'initialisation : " + err.message);
+                console.error(err);
+            }
         }
 
         async function loadTrajets(villes = []) {
-            let url = '/api/trajets';
-            if (villes.length > 0) {
-                url += '?' + villes.map(v => `arret=${encodeURIComponent(v)}`).join('&');
-            }
-
+            const spinner = document.getElementById('loading-spinner');
+            const tableContainer = document.getElementById('table1');
+            
             try {
+                // Afficher le spinner
+                spinner.style.display = 'block';
+                tableContainer.style.display = 'none';
+
+                let url = '/api/trajets';
+                if (villes.length > 0) {
+                    url += '?' + villes.map(v => `arret=${encodeURIComponent(v)}`).join('&');
+                }
+
                 const res = await fetch(url);
+                if (!res.ok) {
+                    throw new Error('Erreur lors du chargement des trajets');
+                }
+                
                 const trajets = await res.json();
 
                 const tbody = document.getElementById('trajets-container');
                 tbody.innerHTML = '';
 
-                trajets.forEach(t => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${t.codeTrajet}</td>
-                        <td>${t.description || ''}</td>
-                        <td>${t.arrets.map(ta => ta.arret.nom).join(' → ')}</td>
+                if (trajets.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                Aucun trajet trouvé
+                            </td>
+                        </tr>
                     `;
-                    tbody.appendChild(tr);
-                });
+                } else {
+                    trajets.forEach(t => {
+                        // Trier les arrêts par ordre avant d'afficher
+                        const sortedArrets = t.arrets.sort((a, b) => a.ordre - b.ordre);
+                        const itineraire = sortedArrets.map(ta => ta.arret.nom).join(' → ');
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td><strong>${t.codeTrajet}</strong></td>
+                            <td>${t.description || '<span class="text-muted">Aucune description</span>'}</td>
+                            <td>
+                                <span class="badge bg-light-primary">${sortedArrets.length} arrêt(s)</span>
+                                <div class="mt-1 small text-muted">${itineraire}</div>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
 
                 // Re-initialiser DataTable
-                if (window.dataTable) window.dataTable.destroy();
-                window.dataTable = new simpleDatatables.DataTable("#table1");
+                if (dataTable) {
+                    dataTable.destroy();
+                }
+                dataTable = new simpleDatatables.DataTable("#table1", {
+                    searchable: true,
+                    perPageSelect: [5, 10, 15, 25, 50],
+                    perPage: 10,
+                    labels: {
+                        placeholder: "Rechercher...",
+                        perPage: "trajets par page",
+                        noRows: "Aucun trajet trouvé",
+                        info: "Affichage de {start} à {end} sur {rows} trajets"
+                    }
+                });
+
+                // Mettre à jour l'info de filtre
+                const filterInfo = document.getElementById('filter-info');
+                const filterCount = document.getElementById('filter-count');
+                
+                if (villes.length > 0) {
+                    filterInfo.style.display = 'block';
+                    filterCount.textContent = trajets.length;
+                } else {
+                    filterInfo.style.display = 'none';
+                }
+
+                // Masquer le spinner
+                spinner.style.display = 'none';
+                tableContainer.style.display = 'table';
+
             } catch (err) {
-                Toastify({
-                    text: "Erreur serveur : " + err.message,
-                    duration: 4000,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
-                    close: true
-                }).showToast();
+                spinner.style.display = 'none';
+                tableContainer.style.display = 'table';
+                showError("Erreur serveur : " + err.message);
                 console.error(err);
             }
         }
 
+        function showError(message) {
+            Toastify({
+                text: message,
+                duration: 4000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
+                close: true,
+                stopOnFocus: true
+            }).showToast();
+        }
+
         document.addEventListener('DOMContentLoaded', initTrajetsPage);
     </script>
+
 </body>
 
 </html>

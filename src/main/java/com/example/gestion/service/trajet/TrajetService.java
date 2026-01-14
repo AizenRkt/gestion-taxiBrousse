@@ -4,8 +4,10 @@ import com.example.gestion.model.trajet.Trajet;
 import com.example.gestion.repository.trajet.TrajetRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TrajetService {
@@ -31,4 +33,20 @@ public class TrajetService {
     public void deleteById(Long id) {
         trajetRepository.deleteById(id);
     }
+
+    // public List<Trajet> getAllTrajets() {
+    //     return trajetRepository.findAllWithArrets();
+    // }
+
+    // public List<TrajetVueRequest> getTrajetsVue() {
+    //     return trajetRepository.findAllVueTrajets()
+    //         .stream()
+    //         .map(p -> new TrajetVueDTO(
+    //             p.getIdTrajet(),
+    //             p.getCodeTrajet(),
+    //             p.getDescription(),
+    //             p.getItineraire()
+    //         ))
+    //         .toList();
+    // }
 }

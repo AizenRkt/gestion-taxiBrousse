@@ -4,6 +4,8 @@ import java.util.List;
 
 import jakarta.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "trajet")
 public class Trajet {
@@ -20,6 +22,7 @@ public class Trajet {
 
     @OneToMany(mappedBy = "trajet", cascade = CascadeType.ALL)
     @OrderBy("ordre ASC")
+    @JsonManagedReference
     private List<TrajetArret> arrets;
 
     public Long getIdTrajet() {

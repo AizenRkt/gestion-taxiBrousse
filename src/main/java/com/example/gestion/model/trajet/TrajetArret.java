@@ -15,6 +15,7 @@ public class TrajetArret {
 
     @ManyToOne
     @JoinColumn(name = "id_trajet", nullable = false)
+    @JsonBackReference
     private Trajet trajet;
 
     @ManyToOne

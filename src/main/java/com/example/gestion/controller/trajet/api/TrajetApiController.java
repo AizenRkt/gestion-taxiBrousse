@@ -29,6 +29,11 @@ public class TrajetApiController {
         this.trajetRepository = trajetRepository;
     }
 
+    @GetMapping
+    public List<Trajet> getAllTrajets() {
+        return trajetRepository.findAllWithArrets();
+    }
+
     @PostMapping("/create")
     public ResponseEntity<?> createTrajet(@RequestBody TrajetRequest request) {
 
@@ -59,19 +64,26 @@ public class TrajetApiController {
         return ResponseEntity.ok("Trajet créé avec succès !");
     }
 
-    @GetMapping
-    public List<TrajetResponse> getTrajets(@RequestParam(required = false) List<String> arret) {
-        List<Trajet> trajets = trajetRepository.findAllWithFilter(arret);
-        return trajets.stream().map(t -> {
-            TrajetResponse dto = new TrajetResponse();
-            dto.setId(t.getIdTrajet());
-            dto.setCodeTrajet(t.getCodeTrajet());
-            dto.setDescription(t.getDescription());
-            dto.setArrets(t.getArrets().stream()
-                            .map(ta -> ta.getArret().getNom())
-                            .collect(Collectors.toList()));
-            return dto;
-        }).collect(Collectors.toList());
-    }
+
+
+    // @GetMapping
+    // public List<TrajetVueDTO> getAllTrajets() {
+    //     return trajetService.findAllTrajetsVue();
+    // }
+
+    // @GetMapping
+    // public List<TrajetResponse> getTrajets(@RequestParam(required = false) List<String> arret) {
+    //     List<Trajet> trajets = trajetRepository.findAllWithFilter(arret);
+    //     return trajets.stream().map(t -> {
+    //         TrajetResponse dto = new TrajetResponse();
+    //         dto.setId(t.getIdTrajet());
+    //         dto.setCodeTrajet(t.getCodeTrajet());
+    //         dto.setDescription(t.getDescription());
+    //         dto.setArrets(t.getArrets().stream()
+    //                         .map(ta -> ta.getArret().getNom())
+    //                         .collect(Collectors.toList()));
+    //         return dto;
+    //     }).collect(Collectors.toList());
+    // }
 
 }

@@ -11,9 +11,29 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface TrajetRepository extends JpaRepository<Trajet, Long> {
 
+    // @Query("SELECT DISTINCT t FROM Trajet t " +
+    //     "JOIN t.arrets ta " +
+    //     "JOIN ta.arret a " +
+    //     "WHERE a.nom IN :nomsArrets")
+    // List<Trajet> findAllWithFilter(@Param("nomsArrets") List<String> nomsArrets);
+
+    //     @Query(
+    //     value = """
+    //         SELECT 
+    //             id_trajet AS idTrajet,
+    //             code_trajet AS codeTrajet,
+    //             description,
+    //             itineraire
+    //         FROM vue_trajets
+    //     """,
+    //     nativeQuery = true
+    // )
+    // List<TrajetVueRequest> findAllVueTrajets();
+
     @Query("SELECT DISTINCT t FROM Trajet t " +
-        "JOIN t.arrets ta " +
-        "JOIN ta.arret a " +
-        "WHERE a.nom IN :nomsArrets")
-    List<Trajet> findAllWithFilter(@Param("nomsArrets") List<String> nomsArrets);
+           "LEFT JOIN FETCH t.arrets ta " +
+           "LEFT JOIN FETCH ta.arret " +
+           "ORDER BY t.idTrajet")
+    List<Trajet> findAllWithArrets();
+
 }
