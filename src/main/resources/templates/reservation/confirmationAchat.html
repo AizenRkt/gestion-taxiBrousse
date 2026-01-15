@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation de Voyage</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" th:href="@{/template/assets/compiled/svg/favicon.svg}" type="image/x-icon">
+
+    <!-- CSS Mazer -->
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app-dark.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/iconly.css}">
+    
+    <style>
+        .info-card {
+            border-left: 4px solid #435ebe;
+            transition: transform 0.2s;
+        }
+        .info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .price-badge {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #198754;
+        }
+        .recap-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 1rem;
+        }
+        .recap-box .recap-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .recap-box .recap-item:last-child {
+            border-bottom: none;
+        }
+        .voyage-badge {
+            display: inline-block;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: 0.25rem;
+        }
+        .form-control:focus {
+            border-color: #435ebe;
+            box-shadow: 0 0 0 0.2rem rgba(67, 94, 190, 0.25);
+        }
+        .stats-icon {
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <script th:src="@{/template/assets/static/js/initTheme.js}"></script>
+    <div id="app">
+
+        <!-- Sidebar dynamique -->
+        <div th:replace="fragments/sidebar :: sidebar"></div>
+
+        <div id="main">
+
+            <!-- Main Content -->
+            <div class="content-wrapper container">
+
+                <!-- Breadcrumb -->
+                <div class="page-heading">
+                    <div class="page-title mb-3">
+                        <div class="row">
+                            <div class="col-12 col-md-6 order-md-1 order-last">
+                                <h3>Confirmation d'achat</h3>
+                                <p class="text-subtitle text-muted">Vérifiez vos informations avant de finaliser</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-content">
+
+                    <!-- Informations du voyage avec cards -->
+                    <section class="row">
+                        <div class="col-12">
+                            <div class="card info-card">
+                                <div class="card-header">
+                                    <div class="d-flex align-items-center">
+                                        <div class="stats-icon bg-primary text-white me-3">
+                                            <i class="iconly-boldTicket"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="card-title mb-0">Détails du Voyage</h4>
+                                            <p class="text-muted mb-0 small">Informations sur votre trajet</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card-body">
+                                    <!-- Stats rapides -->
+                                    <div class="row mb-4" id="voyage-stats">
+                                        <div class="col-6 col-lg-3 col-md-6">
+                                            <div class="card bg-light-primary">
+                                                <div class="card-body px-4 py-4-5">
+                                                    <div class="row">
+                                                        <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
+                                                            <div class="stats-icon blue mb-2">
+                                                                <i class="iconly-boldLocation"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                                                            <h6 class="text-muted font-semibold">Départ</h6>
+                                                            <h6 class="font-extrabold mb-0" id="stat-depart">--</h6>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-lg-3 col-md-6">
+                                            <div class="card bg-light-success">
+                                                <div class="card-body px-4 py-4-5">
+                                                    <div class="row">
+                                                        <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
+                                                            <div class="stats-icon green mb-2">
+                                                                <i class="iconly-boldLocation"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                                                            <h6 class="text-muted font-semibold">Arrivée</h6>
+                                                            <h6 class="font-extrabold mb-0" id="stat-arrivee">--</h6>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-lg-3 col-md-6">
+                                            <div class="card bg-light-warning">
+                                                <div class="card-body px-4 py-4-5">
+                                                    <div class="row">
+                                                        <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
+                                                            <div class="stats-icon orange mb-2">
+                                                                <i class="iconly-boldCalendar"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                                                            <h6 class="text-muted font-semibold">Date & Heure</h6>
+                                                            <h6 class="font-extrabold mb-0" id="stat-date">--</h6>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-lg-3 col-md-6">
+                                            <div class="card bg-light-danger">
+                                                <div class="card-body px-4 py-4-5">
+                                                    <div class="row">
+                                                        <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
+                                                            <div class="stats-icon red mb-2">
+                                                                <i class="iconly-boldTicket"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                                                            <h6 class="text-muted font-semibold">Prix/Place</h6>
+                                                            <h6 class="font-extrabold mb-0" id="stat-prix">--</h6>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Infos véhicule -->
+                                    <div class="alert alert-light-info">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-car-front-fill me-3" style="font-size: 2rem;"></i>
+                                            <div>
+                                                <h6 class="mb-1">Véhicule</h6>
+                                                <p class="mb-0" id="vehicle-info">Chargement...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Formulaire de réservation -->
+                    <section class="row mt-4">
+                        <div class="col-lg-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="d-flex align-items-center">
+                                        <div class="stats-icon bg-success text-white me-3">
+                                            <i class="iconly-boldEdit"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="card-title mb-0">Informations du Passager</h4>
+                                            <p class="text-muted mb-0 small">Remplissez vos coordonnées</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card-body">
+                                    <form id="reservation-form" class="form">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-4">
+                                                    <label for="nbr-place" class="form-label">Nombre de places <span class="text-danger">*</span></label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="bi bi-people-fill"></i></span>
+                                                        <input type="number" class="form-control" id="nbr-place" name="nbr-place" min="1" max="50" value="1" required>
+                                                    </div>
+                                                    <small class="text-muted">Maximum 50 places par réservation</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-4">
+                                                    <label for="nom" class="form-label">Nom complet <span class="text-danger">*</span></label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                                                        <input type="text" class="form-control" id="nom" name="nom" placeholder="Ex: Rakoto Jean" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-4">
+                                                    <label for="telephone" class="form-label">Téléphone <span class="text-danger">*</span></label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text"><i class="bi bi-telephone-fill"></i></span>
+                                                        <input type="tel" class="form-control" id="telephone" name="telephone" placeholder="034 12 345 67" required>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <button type="submit" class="btn btn-primary btn-lg">
+                                                payer
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Récapitulatif -->
+                        <div class="col-lg-4">
+                            <div class="card">
+                                <div class="card-body recap-box p-4">
+                                    <h5 class="text-white mb-4">
+                                        <i class="bi bi-clipboard-check me-2"></i>Récapitulatif
+                                    </h5>
+
+                                    <div class="recap-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-white-50">Trajet</span>
+                                            <strong class="text-white" id="recap-trajet">--</strong>
+                                        </div>
+                                    </div>
+
+                                    <div class="recap-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-white-50">Date & Heure</span>
+                                            <strong class="text-white" id="recap-date">--</strong>
+                                        </div>
+                                    </div>
+
+                                    <div class="recap-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-white-50">Nombre de places</span>
+                                            <strong class="text-white" id="recap-places">1</strong>
+                                        </div>
+                                    </div>
+
+                                    <div class="recap-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-white-50">Prix unitaire</span>
+                                            <strong class="text-white" id="recap-prix-unit">--</strong>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4 pt-3 border-top border-white">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="text-white mb-0">Total à payer</h5>
+                                            <h4 class="text-white mb-0" id="recap-prix-total">--</h4>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JS Mazer -->
+    <script th:src="@{/template/assets/static/js/components/dark.js}"></script>
+    <script th:src="@{/template/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
+    <script th:src="@{/template/assets/compiled/js/app.js}"></script>
+
+    <!-- Script personnalisé -->
+    <script>
+        let prixUnitaire = 0;
+
+        async function initConfirmationPage() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const id = urlParams.get('id');
+                if (!id) throw new Error("ID du voyage manquant.");
+
+                // Fetch du voyage
+                const res = await fetch(`/api/voyages/${id}`);
+                if (!res.ok) throw new Error("Impossible de récupérer le voyage.");
+                const voyage = await res.json();
+
+                // Extraire les informations
+                const arrets = voyage.trajet.arrets.sort((a,b) => a.ordre - b.ordre);
+                const depart = arrets[0].arret.nom;
+                const arrivee = arrets[arrets.length - 1].arret.nom;
+                const dateHeure = new Date(voyage.dateDepart).toLocaleString('fr-FR', { 
+                    dateStyle: 'short', 
+                    timeStyle: 'short' 
+                });
+                const voiture = `${voyage.vehicule.marque} ${voyage.vehicule.modele || ''} (${voyage.vehicule.immatriculation})`;
+                prixUnitaire = voyage.trajet.tarifs[0]?.montant || 0;
+
+                // Remplir les stats cards
+                document.getElementById('stat-depart').textContent = depart;
+                document.getElementById('stat-arrivee').textContent = arrivee;
+                document.getElementById('stat-date').textContent = dateHeure;
+                document.getElementById('stat-prix').textContent = `${prixUnitaire.toLocaleString('fr-FR')} Ar`;
+
+                // Info véhicule
+                document.getElementById('vehicle-info').innerHTML = 
+                    `<strong>${voiture}</strong> - ${voyage.vehicule.capacitePassager || 'N/A'} places`;
+
+                // Récapitulatif
+                document.getElementById('recap-trajet').textContent = `${depart} → ${arrivee}`;
+                document.getElementById('recap-date').textContent = dateHeure;
+                document.getElementById('recap-prix-unit').textContent = `${prixUnitaire.toLocaleString('fr-FR')} Ar`;
+                updateRecapTotal();
+
+                // Listener sur le nombre de places
+                document.getElementById('nbr-place').addEventListener('input', (e) => {
+                    const nbr = parseInt(e.target.value) || 1;
+                    document.getElementById('recap-places').textContent = nbr;
+                    updateRecapTotal();
+                });
+
+                // Gestion du formulaire
+                const form = document.getElementById('reservation-form');
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const btn = form.querySelector('button[type="submit"]');
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Traitement...';
+
+                    const nom = document.getElementById('nom').value;
+                    const telephone = document.getElementById('telephone').value;
+                    const nbrPlace = Number(document.getElementById('nbr-place').value);
+
+                    const payload = {
+                        idVoyage: voyage.idVoyage,
+                        clientNom: nom,
+                        clientTelephone: telephone,
+                        nombrePlaces: nbrPlace,
+                        totalPayer: voyage.trajet.tarifs[0].montant * nbrPlace
+                    };
+
+                    try {
+                        const resPost = await fetch('/api/reservations/achat', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (resPost.ok) {
+                            // Success animation
+                            btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Confirmé !';
+                            btn.classList.remove('btn-primary');
+                            btn.classList.add('btn-success');
+                            
+                            setTimeout(() => {
+                                window.location.href = '/mes-reservations';
+                            }, 1500);
+                        } else {
+                            const err = await resPost.json();
+                            alert('Erreur : ' + (err.message || 'Impossible de réserver.'));
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="bi bi-credit-card me-2"></i>Procéder au Paiement';
+                        }
+                    } catch (error) {
+                        alert('Erreur réseau : ' + error.message);
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-credit-card me-2"></i>Procéder au Paiement';
+                    }
+                });
+
+            } catch(err) {
+                alert("Erreur: " + err.message);
+                console.error(err);
+            }
+        }
+
+        function updateRecapTotal() {
+            const nbr = parseInt(document.getElementById('nbr-place').value) || 1;
+            const total = prixUnitaire * nbr;
+            document.getElementById('recap-prix-total').textContent = `${total.toLocaleString('fr-FR')} Ar`;
+        }
+
+        document.addEventListener('DOMContentLoaded', initConfirmationPage);
+    </script>
+</body>
+</html>

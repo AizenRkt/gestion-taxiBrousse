@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 import com.example.gestion.model.trajet.Trajet;
+import com.example.gestion.model.vehicule.Vehicule;
+import com.example.gestion.model.chauffeur.Chauffeur;
 
 @Entity
 @Table(name = "voyage")
@@ -17,6 +19,14 @@ public class Voyage {
     @ManyToOne
     @JoinColumn(name = "id_trajet", nullable = false)
     private Trajet trajet;
+
+    @ManyToOne
+    @JoinColumn(name = "id_vehicule", nullable = false)
+    private Vehicule vehicule;
+
+    @ManyToOne
+    @JoinColumn(name = "id_chauffeur", nullable = false)
+    private Chauffeur chauffeur;
 
     @Column(name = "date_depart", nullable = false)
     private LocalDateTime dateDepart;
@@ -40,6 +50,22 @@ public class Voyage {
 
     public void setTrajet(Trajet trajet) {
         this.trajet = trajet;
+    }
+
+    public Vehicule getVehicule() {
+        return vehicule;
+    }
+
+    public void setVehicule(Vehicule vehicule) {
+        this.vehicule = vehicule;
+    }
+
+    public Chauffeur getChauffeur() {
+        return chauffeur;
+    }
+
+    public void setChauffeur(Chauffeur chauffeur) {
+        this.chauffeur = chauffeur;
     }
 
     public LocalDateTime getDateDepart() {

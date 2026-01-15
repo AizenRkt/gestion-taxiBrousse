@@ -1,9 +1,9 @@
 package com.example.gestion.model.reservation;
 
-import com.example.gestion.model.client.Client;
-import com.example.gestion.model.voyage.VoyageVehicule;
+import com.example.gestion.model.voyage.Voyage;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,19 +15,32 @@ public class Reservation {
     @Column(name = "id_reservation")
     private Long idReservation;
 
-    @ManyToOne
-    @JoinColumn(name = "id_client", nullable = false)
-    private Client client;
+    @Column(name = "client_nom", nullable = false, length = 100)
+    private String clientNom;
 
-    @ManyToOne
-    @JoinColumn(name = "id_voyage_vehicule", nullable = false)
-    private VoyageVehicule voyageVehicule;
+    @Column(name = "client_tel", length = 20)
+    private String clientTel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_voyage", nullable = false)
+    private Voyage voyage;
 
     @Column(name = "nombre_places", nullable = false)
     private Integer nombrePlaces;
 
-    @Column(name = "date_reservation", nullable = false)
+    @Column(name = "total_payer", nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalPayer;
+
+    @Column(name = "date_reservation")
     private LocalDateTime dateReservation;
+
+    // ===== Lifecycle =====
+    @PrePersist
+    public void prePersist() {
+        if (dateReservation == null) {
+            dateReservation = LocalDateTime.now();
+        }
+    }
 
     // ===== Getters & Setters =====
 
@@ -39,20 +52,28 @@ public class Reservation {
         this.idReservation = idReservation;
     }
 
-    public Client getClient() {
-        return client;
+    public String getClientNom() {
+        return clientNom;
     }
 
-    public void setClient(Client client) {
-        this.client = client;
+    public void setClientNom(String clientNom) {
+        this.clientNom = clientNom;
     }
 
-    public VoyageVehicule getVoyageVehicule() {
-        return voyageVehicule;
+    public String getClientTel() {
+        return clientTel;
     }
 
-    public void setVoyageVehicule(VoyageVehicule voyageVehicule) {
-        this.voyageVehicule = voyageVehicule;
+    public void setClientTel(String clientTel) {
+        this.clientTel = clientTel;
+    }
+
+    public Voyage getVoyage() {
+        return voyage;
+    }
+
+    public void setVoyage(Voyage voyage) {
+        this.voyage = voyage;
     }
 
     public Integer getNombrePlaces() {
@@ -69,5 +90,13 @@ public class Reservation {
 
     public void setDateReservation(LocalDateTime dateReservation) {
         this.dateReservation = dateReservation;
+    }
+
+    public BigDecimal getTotalPayer() {
+        return totalPayer;
+    }
+
+    public void setTotalPayer(BigDecimal totalPayer) {
+        this.totalPayer = totalPayer;
     }
 }

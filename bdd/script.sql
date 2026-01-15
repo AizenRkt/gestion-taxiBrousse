@@ -17,6 +17,13 @@ CREATE TABLE trajet_arret (
     ordre INT NOT NULL
 );
 
+CREATE TABLE trajet_tarif(
+    id_trajet_tarif SERIAL PRIMARY KEY,
+    id_trajet INT REFERENCES trajet(id_trajet),
+    montant DECIMAL(10, 2) NOT NULL,
+    date_tarif DATE NOT NULL
+);
+
 -- chauffeur
 CREATE TABLE chauffeur (
     id_chauffeur SERIAL PRIMARY KEY,
@@ -53,28 +60,40 @@ CREATE TABLE vehicule_status (
 CREATE TABLE voyage (
     id_voyage SERIAL PRIMARY KEY,
     id_trajet INT REFERENCES trajet(id_trajet),
+    id_vehicule INT REFERENCES vehicule(id_vehicule),
+    id_chauffeur INT REFERENCES chauffeur(id_chauffeur),
     date_depart TIMESTAMP NOT NULL,
     date_arrivee TIMESTAMP NOT NULL
 );
 
-CREATE TABLE voyage_vehicule (
-    id_voyage_vehicule SERIAL PRIMARY KEY,
-    id_voyage INT REFERENCES voyage(id_voyage),
-    id_vehicule INT REFERENCES vehicule(id_vehicule),
-    id_chauffeur INT REFERENCES chauffeur(id_chauffeur)
+-- partie client 
+-- CREATE TABLE client (
+--     id_client SERIAL PRIMARY KEY,
+--     nom VARCHAR(100) NOT NULL,
+--     telephone VARCHAR(20)
+-- );
+
+CREATE TABLE trajet (
+    id_trajet SERIAL PRIMARY KEY,
+    code_trajet VARCHAR(50) NOT NULL,
+    description TEXT
 );
 
--- partie client 
-CREATE TABLE client (
-    id_client SERIAL PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL,
-    telephone VARCHAR(20)
+CREATE TABLE voyage (
+    id_voyage SERIAL PRIMARY KEY,
+    id_trajet INT REFERENCES trajet(id_trajet),
+    id_vehicule INT REFERENCES vehicule(id_vehicule),
+    id_chauffeur INT REFERENCES chauffeur(id_chauffeur),
+    date_depart TIMESTAMP NOT NULL,
+    date_arrivee TIMESTAMP NOT NULL
 );
 
 CREATE TABLE reservation (
     id_reservation SERIAL PRIMARY KEY,
-    id_client INT REFERENCES client(id_client),
-    id_voyage_vehicule INT REFERENCES voyage_vehicule(id_voyage_vehicule),
+    client_nom VARCHAR(100) NOT NULL,
+    client_tel VARCHAR(20),
+    id_voyage INT REFERENCES voyage(id_voyage),
     nombre_places INT NOT NULL,
+    total_payer DECIMAL(10, 2) NOT NULL,
     date_reservation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -108,6 +108,7 @@
                                         <th>Code trajet</th>
                                         <th>Description</th>
                                         <th>Itinéraire (Arrêts)</th>
+                                        <th>CA (Ar)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="trajets-container">
@@ -230,6 +231,7 @@
                                 <span class="badge bg-light-primary">${sortedArrets.length} arrêt(s)</span>
                                 <div class="mt-1 small text-muted">${itineraire}</div>
                             </td>
+                            <td>${t.chiffreAffaire}</td>
                         `;
                         tbody.appendChild(tr);
                     });

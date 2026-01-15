@@ -16,19 +16,39 @@ public class VoyageService {
         this.voyageRepository = voyageRepository;
     }
 
-    public List<Voyage> findAll() {
+    // Récupérer tous les voyages
+    public List<Voyage> getAllVoyages() {
         return voyageRepository.findAll();
     }
 
-    public Optional<Voyage> findById(Long id) {
+    // Récupérer un voyage par son id
+    public Optional<Voyage> getVoyageById(Long id) {
         return voyageRepository.findById(id);
     }
 
-    public Voyage save(Voyage voyage) {
+    // Créer un voyage
+    public Voyage createVoyage(Voyage voyage) {
         return voyageRepository.save(voyage);
     }
 
-    public void deleteById(Long id) {
-        voyageRepository.deleteById(id);
+    // Mettre à jour un voyage
+    public Voyage updateVoyage(Long id, Voyage voyageDetails) {
+        Voyage voyage = voyageRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Voyage non trouvé avec id: " + id));
+
+        voyage.setTrajet(voyageDetails.getTrajet());
+        voyage.setVehicule(voyageDetails.getVehicule());
+        voyage.setChauffeur(voyageDetails.getChauffeur());
+        voyage.setDateDepart(voyageDetails.getDateDepart());
+        voyage.setDateArrivee(voyageDetails.getDateArrivee());
+
+        return voyageRepository.save(voyage);
+    }
+
+    // Supprimer un voyage
+    public void deleteVoyage(Long id) {
+        Voyage voyage = voyageRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Voyage non trouvé avec id: " + id));
+        voyageRepository.delete(voyage);
     }
 }

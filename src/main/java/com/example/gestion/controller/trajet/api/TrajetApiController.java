@@ -11,6 +11,7 @@ import com.example.gestion.service.trajet.TrajetService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +32,15 @@ public class TrajetApiController {
 
     @GetMapping
     public List<Trajet> getAllTrajets() {
-        return trajetRepository.findAllWithArrets();
+        
+        List<Trajet> trajets = trajetRepository.findAllWithArrets();
+
+        for (Trajet trajet : trajets) {
+            BigDecimal ca = trajetRepository.findChiffreAffaireByIdTrajet(trajet.getIdTrajet());
+            trajet.setChiffreAffaire(ca != null ? ca : BigDecimal.ZERO);
+        }
+
+        return trajets;
     }
 
     @PostMapping("/create")
@@ -63,27 +72,5 @@ public class TrajetApiController {
 
         return ResponseEntity.ok("Trajet créé avec succès !");
     }
-
-
-
-    // @GetMapping
-    // public List<TrajetVueDTO> getAllTrajets() {
-    //     return trajetService.findAllTrajetsVue();
-    // }
-
-    // @GetMapping
-    // public List<TrajetResponse> getTrajets(@RequestParam(required = false) List<String> arret) {
-    //     List<Trajet> trajets = trajetRepository.findAllWithFilter(arret);
-    //     return trajets.stream().map(t -> {
-    //         TrajetResponse dto = new TrajetResponse();
-    //         dto.setId(t.getIdTrajet());
-    //         dto.setCodeTrajet(t.getCodeTrajet());
-    //         dto.setDescription(t.getDescription());
-    //         dto.setArrets(t.getArrets().stream()
-    //                         .map(ta -> ta.getArret().getNom())
-    //                         .collect(Collectors.toList()));
-    //         return dto;
-    //     }).collect(Collectors.toList());
-    // }
 
 }

@@ -24,6 +24,13 @@ INSERT INTO chauffeur (nom, prenom, date_de_naissance) VALUES('Rasolofonirina', 
 INSERT INTO trajet (code_trajet, description) 
 VALUES ('T001', 'Trajet principal entre Antananarivo et Tamatave');
 
-INSERT INTO trajet_arret (id_trajet, id_arret, ordre) VALUES (1, 24, 1); -- Antananarivo
-INSERT INTO trajet_arret (id_trajet, id_arret, ordre) VALUES (1, 22, 2); -- Moramanga
-INSERT INTO trajet_arret (id_trajet, id_arret, ordre) VALUES (1, 17, 3); -- Tamatave
+INSERT INTO trajet_arret (id_trajet, id_arret, ordre) VALUES (1, 1, 1); -- Antananarivo
+INSERT INTO trajet_arret (id_trajet, id_arret, ordre) VALUES (1, 2, 3); -- Tamatave
+
+INSERT INTO trajet_tarif (id_trajet, montant, date_tarif)
+VALUES (1, 30000, '2024-01-01');
+
+-- donées de voyage 
+INSERT INTO voyage (id_trajet, id_vehicule, id_chauffeur, date_depart, date_arrivee)
+VALUES (1, 1, 1, '2024-07-01 08:00:00', '2024-07-01 18:00:00');
+

@@ -52,7 +52,7 @@
 
                     <li class="sidebar-item" th:classappend="${activePage == 'dashboard'} ? 'active'">
                         <a th:href="@{/}" class="sidebar-link">
-                            <i class="bi bi-send-fill"></i>
+                            <i class="bi bi-bar-chart-fill"></i>
                             <span>Dashboard</span>
                         </a>
                     </li>
@@ -62,14 +62,14 @@
                     <li class="sidebar-item">
                         <a th:href="@{/}" class="sidebar-link">
                             <i class="bi bi-car-front-fill"></i>
-                            <span>vehicule</span>
+                            <span>Vehicule</span>
                         </a>
                     </li>
 
                     <li class="sidebar-item">
                         <a th:href="@{/}" class="sidebar-link">
                             <i class="bi bi-person-fill"></i>
-                            <span>chauffeur</span>
+                            <span>Chauffeur</span>
                         </a>
                     </li>
 
@@ -78,7 +78,7 @@
                     <li class="sidebar-item">
                         <a th:href="@{/arrets/listing}" class="sidebar-link">
                             <i class="bi bi-circle-fill"></i>
-                            <span>arrêt</span>
+                            <span>Arrêt</span>
                         </a>
                     </li>
 
@@ -86,17 +86,27 @@
                     <li class="sidebar-item">
                         <a th:href="@{/trajets/list}" class="sidebar-link">
                             <i class="bi bi-map-fill"></i>
-                            <span>itinéraire</span>
+                            <span>Itinéraire</span>
                         </a>
                     </li>
 
 
                     <li class="sidebar-item">
-                        <a th:href="@{/}" class="sidebar-link">
+                        <a th:href="@{/voyages/create}" class="sidebar-link">
                             <i class="bi bi-send-fill"></i>
-                            <span>programmer un voyage</span>
+                            <span>Programmer un voyage</span>
                         </a>
                     </li>
+
+                    <li class="sidebar-title">features</li>
+
+                    <li class="sidebar-item">
+                        <a th:href="@{/reservations/voyages}" class="sidebar-link">
+                            <i class="bi bi-ticket-fill"></i>
+                            <span>acheter des places</span>
+                        </a>
+                    </li>
+
                 </ul>
             </div>
         </div>

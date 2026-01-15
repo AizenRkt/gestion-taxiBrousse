@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des voyages</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" th:href="@{/template/assets/compiled/svg/favicon.svg}" type="image/x-icon">
+
+    <!-- CSS Mazer -->
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app-dark.css}">
+
+    <!-- Datatable & Toastify -->
+    <link rel="stylesheet" th:href="@{/template/assets/extensions/simple-datatables/style.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/table-datatable.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/extensions/toastify-js/src/toastify.css}">
+</head>
+
+<body>
+<script th:src="@{/template/assets/static/js/initTheme.js}"></script>
+
+<div id="app">
+
+    <!-- Sidebar -->
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <div id="main">
+
+        <!-- Header -->
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <!-- Page Heading -->
+        <div class="page-heading">
+            <div class="page-title">
+                <div class="row">
+                    <div class="col-12 col-md-6 order-md-1 order-last">
+                        <h3>Voyages</h3>
+                        <p class="text-subtitle text-muted">
+                            Liste de tous les voyages programmés
+                        </p>
+                    </div>
+                    <div class="col-12 col-md-6 order-md-2 order-first text-end">
+                        <a href="/voyages/create" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            Créer un voyage
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section">
+
+                <!-- Tableau des voyages -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Liste des voyages</h4>
+                    </div>
+
+                    <div class="card-body">
+
+                        <!-- Loader -->
+                        <div id="loading-spinner" class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2 text-muted">Chargement des voyages...</p>
+                        </div>
+
+                        <table class="table table-striped" id="table1" style="display:none">
+                            <thead>
+                            <tr>
+                                <th>Date départ</th>
+                                <th>Date arrivée</th>
+                                <th>Trajet</th>
+                                <th>Arrêts</th>
+                                <th>Véhicule</th>
+                            </tr>
+                            </thead>
+                            <tbody id="voyages-container">
+                            <!-- JS -->
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- JS Mazer -->
+<script th:src="@{/template/assets/static/js/components/dark.js}"></script>
+<script th:src="@{/template/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
+<script th:src="@{/template/assets/compiled/js/app.js}"></script>
+
+<!-- Datatable & Toastify -->
+<script th:src="@{/template/assets/extensions/simple-datatables/umd/simple-datatables.js}"></script>
+<script th:src="@{/template/assets/extensions/toastify-js/src/toastify.js}"></script>
+
+<script>
+let dataTable;
+
+async function loadVoyages() {
+    const spinner = document.getElementById("loading-spinner");
+    const table = document.getElementById("table1");
+    const tbody = document.getElementById("voyages-container");
+
+    try {
+        const res = await fetch("/api/voyages");
+        if (!res.ok) throw new Error("Erreur lors du chargement des voyages");
+
+        const voyages = await res.json();
+        tbody.innerHTML = "";
+
+        if (voyages.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        Aucun voyage trouvé
+                    </td>
+                </tr>
+            `;
+        } else {
+            voyages.forEach(v => {
+
+                // Arrêts triés par ordre
+                const arrets = v.trajet.arrets
+                    .sort((a, b) => a.ordre - b.ordre)
+                    .map(a => a.arret.nom)
+                    .join(" → ");
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${formatDate(v.dateDepart)}</td>
+                    <td>${formatDate(v.dateArrivee)}</td>
+                    <td>
+                        <strong>${v.trajet.codeTrajet}</strong><br>
+                        <small class="text-muted">${v.trajet.description}</small>
+                    </td>
+                    <td>${arrets}</td>
+                    <td>
+                        <span class="badge bg-light-primary me-1">
+                            #${v.vehicule.idVehicule}
+                        </span>
+                        ${v.vehicule.marque}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        spinner.style.display = "none";
+        table.style.display = "table";
+
+        if (dataTable) dataTable.destroy();
+        dataTable = new simpleDatatables.DataTable("#table1", {
+            perPage: 10,
+            searchable: true,
+            labels: {
+                placeholder: "Rechercher...",
+                noRows: "Aucun voyage",
+                info: "Affichage de {start} à {end} sur {rows} voyages"
+            }
+        });
+
+    } catch (err) {
+        spinner.style.display = "none";
+        showError(err.message);
+        console.error(err);
+    }
+}
+
+function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleString("fr-FR", {
+        dateStyle: "short",
+        timeStyle: "short"
+    });
+}
+
+function showError(message) {
+    Toastify({
+        text: message,
+        duration: 4000,
+        gravity: "top",
+        position: "right",
+        style: {
+            background: "linear-gradient(to right, #ff5f6d, #ffc371)"
+        },
+        close: true
+    }).showToast();
+}
+
+document.addEventListener("DOMContentLoaded", loadVoyages);
+</script>
+
+</body>
+</html>

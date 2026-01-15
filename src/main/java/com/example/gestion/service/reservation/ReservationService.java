@@ -20,6 +20,10 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
+    public List<Reservation> findAllWithDetails() {
+        return reservationRepository.findAllWithDetails();
+    }
+
     public Optional<Reservation> findById(Long id) {
         return reservationRepository.findById(id);
     }

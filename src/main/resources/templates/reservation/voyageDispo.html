@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Billets</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" th:href="@{/template/assets/compiled/svg/favicon.svg}" type="image/x-icon">
+
+    <!-- CSS Mazer -->
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app-dark.css}">
+</head>
+
+<body>
+<script th:src="@{/template/assets/static/js/initTheme.js}"></script>
+
+<div id="app">
+
+    <!-- Sidebar -->
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <div id="main">
+
+        <!-- Header -->
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <!-- Page Heading -->
+        <div class="page-heading">
+            <h3>Gestion des places pour voyage</h3>
+            <p class="text-subtitle text-muted">
+                Voyages disponibles à l'achat de place
+            </p>
+        </div>
+
+        <div class="page-content">
+
+            <!-- filtre -->
+            <section class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Rechercher un trajet</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="search-form">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="form-label">Départ</label>
+                                    <select class="form-select" id="filter-depart">
+                                        <option value="">-- Choisir --</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Arrivée</label>
+                                    <select class="form-select" id="filter-arrivee">
+                                        <option value="">-- Choisir --</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Date de départ</label>
+                                    <input type="datetime-local" class="form-control" id="filter-date">
+                                </div>
+
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button class="btn btn-primary w-100" type="submit">
+                                        <i class="bi bi-search me-1"></i> Rechercher
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Carte principale -->
+            <section class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Liste des voyages</h4>
+                    </div>
+
+                    <div class="card-body">
+
+                        <!-- Loader -->
+                        <div id="loading" class="text-center py-5">
+                            <div class="spinner-border text-primary"></div>
+                            <p class="mt-2 text-muted">Chargement des voyages...</p>
+                        </div>
+
+                        <!-- Tableau -->
+                        <table class="table table-striped table-hover" id="voyages-table" style="display:none">
+                            <thead>
+                                <tr>
+                                    <th>Départ</th>
+                                    <th>Arrivée</th>
+                                    <th>Date & Heure</th>
+                                    <th>Voiture</th>
+                                    <th>Prix / pkace </th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="voyages-table-body">
+                                <!-- JS -->
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+</div>
+
+<!-- JS Mazer -->
+<script th:src="@{/template/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
+<script th:src="@{/template/assets/compiled/js/app.js}"></script>
+
+<script>
+let allVoyages = [];
+
+async function loadVoyages() {
+    const tbody = document.getElementById("voyages-table-body");
+    const loading = document.getElementById("loading");
+    const table = document.getElementById("voyages-table");
+
+    const departSelect = document.getElementById("filter-depart");
+    const arriveeSelect = document.getElementById("filter-arrivee");
+
+    try {
+        const res = await fetch("/api/voyages");
+        if (!res.ok) throw new Error("Erreur chargement voyages");
+
+        allVoyages = await res.json();
+
+        const villes = new Set();
+
+        allVoyages.forEach(v => {
+            const arrets = v.trajet.arrets.sort((a, b) => a.ordre - b.ordre);
+            villes.add(arrets[0].arret.nom);
+            villes.add(arrets[arrets.length - 1].arret.nom);
+        });
+
+        villes.forEach(ville => {
+            departSelect.innerHTML += `<option value="${ville}">${ville}</option>`;
+            arriveeSelect.innerHTML += `<option value="${ville}">${ville}</option>`;
+        });
+
+        afficherVoyages(allVoyages);
+
+        loading.style.display = "none";
+        table.style.display = "table";
+
+    } catch (err) {
+        loading.innerHTML = "<p class='text-danger'>Erreur de chargement</p>";
+        console.error(err);
+    }
+}
+
+function afficherVoyages(voyages) {
+    const tbody = document.getElementById("voyages-table-body");
+    tbody.innerHTML = "";
+
+    if (voyages.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center text-muted">
+                    Aucun voyage trouvé
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    voyages.forEach(v => {
+        const arrets = v.trajet.arrets.sort((a, b) => a.ordre - b.ordre);
+        const depart = arrets[0].arret.nom;
+        const arrivee = arrets[arrets.length - 1].arret.nom;
+
+        const date = new Date(v.dateDepart).toLocaleString("fr-FR", {
+            dateStyle: "short",
+            timeStyle: "short"
+        });
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${depart}</td>
+            <td>${arrivee}</td>
+            <td>${date}</td>
+            <td>
+                <span class="badge bg-light-primary me-1">
+                    #${v.vehicule.idVehicule}
+                </span>
+                ${v.vehicule.marque} - ${v.vehicule.immatriculation}
+            </td>
+            <td class="text-muted">${v.trajet.tarifs[0].montant} ar</td>
+            <td>
+                <a href="/reservations/voyage/confirmation?id=${v.idVoyage}">
+                    <button class="btn btn-sm btn-primary">
+                        acheter
+                    </button>
+                </a>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+//Recherche
+document.getElementById("search-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const depart = document.getElementById("filter-depart").value;
+    const arrivee = document.getElementById("filter-arrivee").value;
+    const date = document.getElementById("filter-date").value;
+
+    const resultats = allVoyages.filter(v => {
+        const arrets = v.trajet.arrets.sort((a, b) => a.ordre - b.ordre);
+        const vDepart = arrets[0].arret.nom;
+        const vArrivee = arrets[arrets.length - 1].arret.nom;
+
+        let ok = true;
+
+        if (depart && vDepart !== depart) ok = false;
+        if (arrivee && vArrivee !== arrivee) ok = false;
+        if (date && !v.dateDepart.startsWith(date)) ok = false;
+
+        return ok;
+    });
+
+    afficherVoyages(resultats);
+});
+
+document.addEventListener("DOMContentLoaded", loadVoyages);
+</script>
+
+</body>
+</html>
