@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Détail du véhicule</title>
+
+    <!-- CSS Mazer -->
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app-dark.css}">
+</head>
+
+<body>
+    <div id="app">
+
+        <!-- Sidebar -->
+        <div th:replace="fragments/sidebar :: sidebar"></div>
+
+        <div id="main">
+
+            <!-- Header -->
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+
+            <div class="page-heading">
+                <h3>Détails du véhicule</h3>
+            </div>
+
+            <div class="page-content">
+
+                <!-- Carte info véhicule -->
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Informations du véhicule</h4>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>ID :</strong> <span id="idVehicule"></span></p>
+                        <p><strong>Immatriculation :</strong> <span id="immatriculation"></span></p>
+                        <p><strong>Marque :</strong> <span id="marque"></span></p>
+                        <!-- <p><strong>Capacité passagers :</strong> <span id="capacite"></span></p> -->
+                    </div>
+                </div>
+
+                <!-- Tableau des places -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h4>Places par type</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="placesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Type de place</th>
+                                        <th>Nombre de sièges</th>
+                                        <th>Montant max</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Les lignes seront insérées par JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carte tarif max -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h4>Tarif maximum pour ce véhicule</h4>
+                    </div>
+                    <div class="card-body">
+                        <h2 id="tarifMax" class="text-success">--</h2>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JS Mazer -->
+    <script th:src="@{/template/assets/static/js/components/dark.js}"></script>
+    <script th:src="@{/template/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
+    <script th:src="@{/template/assets/compiled/js/app.js}"></script>
+
+    <!-- JS métier -->
+    <script>
+        const pathParts = window.location.pathname.split("/").filter(p => p.length > 0);
+        const vehiculeId = pathParts[pathParts.length - 1];
+
+        // Charger infos véhicule
+        async function loadVehicule() {
+            const res = await fetch(`/api/vehicules/${vehiculeId}`);
+            const v = await res.json();
+
+            document.getElementById("idVehicule").textContent = v.idVehicule;
+            document.getElementById("immatriculation").textContent = v.immatriculation;
+            document.getElementById("marque").textContent = v.marque;
+            // document.getElementById("capacite").textContent = v.capacitePassager;
+        }
+
+        // Charger tableau des places et tarif max
+        async function loadPlacesAndTarifMax() {
+            // http://localhost:8080/api/vehicules/1/places
+            const res = await fetch(`/api/vehicules/${vehiculeId}/places`);
+            const places = await res.json();
+
+            const tbody = document.querySelector('#placesTable tbody');
+            tbody.innerHTML = '';
+
+            let tarifMax = 0;
+
+            places.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${p.placeType}</td>
+                    <td>${p.nombrePlaces}</td>
+                    <td>${p.montantMax} Ar</td>
+                `;
+                tbody.appendChild(tr);
+                // Calculer le montant max global
+                 tarifMax += p.montantMax;
+                
+            });
+
+            document.getElementById("tarifMax").textContent = tarifMax + " Ar";
+        }
+
+        // Initialisation
+        loadVehicule();
+        loadPlacesAndTarifMax();
+    </script>
+
+</body>
+</html>

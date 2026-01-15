@@ -34,3 +34,6 @@ VALUES (1, 30000, '2024-01-01');
 INSERT INTO voyage (id_trajet, id_vehicule, id_chauffeur, date_depart, date_arrivee)
 VALUES (1, 1, 1, '2024-07-01 08:00:00', '2024-07-01 18:00:00');
 
+INSERT INTO tarif_place_type (id_place_type, montant, date_tarif) VALUES
+(1, 80000, '2026-01-01'),  -- Standard
+(2, 140000, '2026-01-01');  -- Premium

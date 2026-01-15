@@ -11,6 +11,6 @@ public class ArretController {
 
     @GetMapping("/listing")
     public String listing(Model model) {
-        return "arret/arret";
+        return "trajet/arret";
     }
 }
