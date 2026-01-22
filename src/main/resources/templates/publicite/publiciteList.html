@@ -13,9 +13,7 @@
     <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app.css}">
     <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app-dark.css}">
 
-    <!-- Datatable & Toastify -->
-    <link rel="stylesheet" th:href="@{/template/assets/extensions/simple-datatables/style.css}">
-    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/table-datatable.css}">
+    <!-- Toastify -->
     <link rel="stylesheet" th:href="@{/template/assets/extensions/toastify-js/src/toastify.css}">
 </head>
 
@@ -52,99 +50,128 @@
             <section class="section">
 
                 <!-- Filtre -->
-            <div class="filters mb-3 d-flex align-items-center gap-2">
-    <input type="date" id="filter-date" class="form-control" placeholder="Date diffusion">
-    
-    <select id="filter-societe" class="form-select">
-        <option value="">Toutes les sociétés</option>
-    </select>
+                <div class="filters mb-3 d-flex align-items-center gap-2">
+                    <input type="date" id="filter-date" class="form-control" placeholder="Date diffusion">
 
-    <button id="filter-btn" class="btn btn-primary">Filtrer</button>
-    <button id="reset-btn" class="btn btn-secondary">Reset</button>
+                    <select id="filter-societe" class="form-select">
+                        <option value="">Toutes les sociétés</option>
+                    </select>
+
+                    <button id="filter-btn" class="btn btn-primary">Filtrer</button>
+                    <button id="reset-btn" class="btn btn-secondary">Reset</button>
+                </div>
+
+                <table class="table table-striped" id="table1">
+                    <thead>
+                        <tr>
+                            <th>Société</th>
+                            <th>Arrêts</th>
+                            <th>Date diffusion</th>
+                            <th>Code pub</th>
+                            <th>Tarif</th>
+                        </tr>
+                    </thead>
+                    <tbody id="diffusions-container"></tbody>
+                </table>
+
+                <!-- Chiffre d'affaires -->
+                <div class="mt-3">
+                    <strong>Chiffre d'affaires : </strong>
+                    <span id="ca-value">0.00</span> €
+                </div>
+
+            </section>
+        </div>
+    </div>
 </div>
 
-<table class="table table-striped" id="table1">
-    <thead>
-        <tr>
-            <th>Société</th>
-            <th>Arrêts</th>
-            <th>Date diffusion</th>
-            <th>Code pub</th>
-            <th>Tarif</th>
-        </tr>
-    </thead>
-    <tbody id="diffusions-container"></tbody>
-</table>
+<!-- Toastify JS -->
+<script th:src="@{/template/assets/extensions/toastify-js/src/toastify.js}"></script>
 
 <script>
-let dataTable;
-
 async function loadSocietes() {
     const select = document.getElementById("filter-societe");
-    const res = await fetch("/api/societes");
-    const societes = await res.json();
-    societes.forEach(s => {
-        const opt = document.createElement("option");
-        opt.value = s.idSociete;
-        opt.textContent = s.nom;
-        select.appendChild(opt);
-    });
+    try {
+        const res = await fetch("/api/societes");
+        const societes = await res.json();
+        societes.forEach(s => {
+            const opt = document.createElement("option");
+            opt.value = s.idSociete;
+            opt.textContent = s.nom;
+            select.appendChild(opt);
+        });
+    } catch (err) {
+        showError("Erreur lors du chargement des sociétés");
+    }
 }
 
 async function loadDiffusions(date = "", idSociete = "") {
     const tbody = document.getElementById("diffusions-container");
 
-    // Construire l'URL dynamiquement en omettant les params vides
+    // Construire l'URL dynamiquement
     let url = "/api/publicites/diffusions";
     const params = new URLSearchParams();
     if (date) params.append("date", date);
     if (idSociete) params.append("idSociete", idSociete);
     if ([...params].length) url += "?" + params.toString();
 
-    const res = await fetch(url);
-    if (!res.ok) return showError("Erreur lors du chargement des diffusions");
-    const diffusions = await res.json();
+    try {
+        const res = await fetch(url);
+        if (!res.ok) return showError("Erreur lors du chargement des diffusions");
+        const diffusions = await res.json();
 
-    tbody.innerHTML = "";
+        tbody.innerHTML = "";
 
-    if (diffusions.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="5" class="text-center text-muted py-4">
-                    Aucune diffusion trouvée
-                </td>
-            </tr>
-        `;
-    } else {
-        diffusions.forEach(d => {
-            const arrets = d.voyage.trajet.arrets
-                .sort((a, b) => a.ordre - b.ordre)
-                .map(a => a.arret.nom)
-                .join(" → ");
-
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${d.publicite.societe.nom}</td>
-                <td>${arrets}</td>
-                <td>${formatDate(d.dateDiffusion)}</td>
-                <td>${d.publicite.code}</td>
-                <td>${d.tarifMontant ? d.tarifMontant.toFixed(2) : "N/A"}</td>
+        if (diffusions.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        Aucune diffusion trouvée
+                    </td>
+                </tr>
             `;
-            tbody.appendChild(tr);
-        });
-    }
+        } else {
+            diffusions.forEach(d => {
+                const arrets = d.voyage.trajet.arrets
+                    .sort((a, b) => a.ordre - b.ordre)
+                    .map(a => a.arret.nom)
+                    .join(" → ");
 
-    // Initialiser ou réinitialiser la DataTable
-    if (dataTable) dataTable.destroy();
-    dataTable = new simpleDatatables.DataTable("#table1", {
-        perPage: 10,
-        searchable: true,
-        labels: {
-            placeholder: "Rechercher...",
-            noRows: "Aucune diffusion",
-            info: "Affichage de {start} à {end} sur {rows} diffusions"
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${d.publicite.societe.nom}</td>
+                    <td>${arrets}</td>
+                    <td>${formatDate(d.dateDiffusion)}</td>
+                    <td>${d.publicite.code}</td>
+                    <td>${d.tarifMontant ? d.tarifMontant.toFixed(2) : "N/A"}</td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
-    });
+
+        // Mettre à jour le chiffre d'affaires
+        await updateCA(date, idSociete);
+
+    } catch (err) {
+        showError("Erreur lors du chargement des diffusions");
+    }
+}
+
+async function updateCA(date = "", idSociete = "") {
+    let url = "/api/publicites/ca";
+    const params = new URLSearchParams();
+    if (date) params.append("date", date);
+    if (idSociete) params.append("idSociete", idSociete);
+    if ([...params].length) url += "?" + params.toString();
+
+    try {
+        const res = await fetch(url);
+        if (!res.ok) return showError("Erreur lors du calcul du chiffre d'affaires");
+        const ca = await res.json();
+        document.getElementById("ca-value").textContent = ca.toFixed(2);
+    } catch (err) {
+        showError("Erreur lors du calcul du chiffre d'affaires");
+    }
 }
 
 function formatDate(dateStr) {
@@ -183,7 +210,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadDiffusions();
 });
 </script>
-
 
 </body>
 </html>
