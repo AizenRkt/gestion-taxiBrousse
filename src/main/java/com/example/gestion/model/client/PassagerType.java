@@ -3,22 +3,23 @@ package com.example.gestion.model.client;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "type_passager")
+@Table(name = "passager_type")
 public class PassagerType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idTypePassager;
+    @Column(name = "id_passager_type") 
+    private Long idPassagerType;
 
     @Column(nullable = false, unique = true)
     private String libelle;
 
-    public Long getIdTypePassager() {
-        return idTypePassager;
+    public Long getIdPassagerType() {
+        return idPassagerType;
     }
-    
-    public void setIdTypePassager(Long idTypePassager) {
-        this.idTypePassager = idTypePassager;
+
+    public void setIdPassagerType(Long idPassagerType) {
+        this.idPassagerType = idPassagerType;
     }
 
     public String getLibelle() {

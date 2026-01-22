@@ -39,9 +39,9 @@ public class TarificationService {
                 if (cond.getChamp().equals("passager_type") && cond.getValeur().equals(passagerType.getLibelle())
                         || cond.getChamp().equals("place_type") && cond.getValeur().equals(placeType.getLibelle())) {
 
-                    if (remise.getType().getIdTypeRemise() == 2) {
+                    if (remise.getType().getIdRemiseType() == 2) {
                         tarifBase = remise.getValeur();
-                    } else if (remise.getType().getIdTypeRemise() == 1) { 
+                    } else if (remise.getType().getIdRemiseType() == 1) { 
                         BigDecimal reduction = tarifBase.multiply(remise.getValeur().divide(BigDecimal.valueOf(100)));
                         tarifBase = tarifBase.subtract(reduction);
                     }

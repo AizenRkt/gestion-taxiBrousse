@@ -3,22 +3,23 @@ package com.example.gestion.model.remise;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "type_remise")
+@Table(name = "remise_type")
 public class RemiseType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idTypeRemise;
+    @Column(name = "id_remise_type")
+    private Long IdRemiseType;
 
     @Column(nullable = false, unique = true)
     private String libelle; 
 
-    public Long getIdTypeRemise() {
-        return idTypeRemise;
+    public Long getIdRemiseType() {
+        return IdRemiseType;
     }
 
-    public void setIdTypeRemise(Long idTypeRemise) {
-        this.idTypeRemise = idTypeRemise;
+    public void setIdRemiseType(Long IdRemiseType) {
+        this.IdRemiseType = IdRemiseType;
     }
 
     public String getLibelle() {
