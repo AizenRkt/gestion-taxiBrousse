@@ -17,4 +17,18 @@ INSERT INTO tarif_place_type (id_place_type, montant, date_tarif) VALUES
 -- eco enfant 40000
 
 -- tarif senior = tarif adulte - 20% 
+curl -X POST http://localhost:8080/api/reservations/achat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "idVoyage": 1,
+    "clientNom": "Rakoto Jean",
+    "clientTel": "0329876543",
+    "details": [
+      {
+        "idPlaceType": 1,
+        "idPassagerType": 2,
+        "nombrePlaces": 2
+      } 
+    ]
+  }'
 

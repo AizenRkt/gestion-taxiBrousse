@@ -1,6 +1,8 @@
 package com.example.gestion.model.reservation;
 
 import com.example.gestion.model.voyage.Voyage;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -36,6 +38,7 @@ public class Reservation {
     private LocalDateTime dateReservation;
 
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<ReservationDetail> details;
 
     // ===== Lifecycle =====

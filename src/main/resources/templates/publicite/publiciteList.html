@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des publicités diffusées</title>
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" th:href="@{/template/assets/compiled/svg/favicon.svg}" type="image/x-icon">
+
+    <!-- CSS Mazer -->
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app-dark.css}">
+
+    <!-- Datatable & Toastify -->
+    <link rel="stylesheet" th:href="@{/template/assets/extensions/simple-datatables/style.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/table-datatable.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/extensions/toastify-js/src/toastify.css}">
+</head>
+
+<body>
+<script th:src="@{/template/assets/static/js/initTheme.js}"></script>
+
+<div id="app">
+
+    <!-- Sidebar -->
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <div id="main">
+
+        <!-- Header -->
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <!-- Page Heading -->
+        <div class="page-heading">
+            <div class="page-title">
+                <div class="row">
+                    <div class="col-12 col-md-6 order-md-1 order-last">
+                        <h3>Publicités diffusées</h3>
+                        <p class="text-subtitle text-muted">
+                            Liste de toutes les diffusions de publicités
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section">
+
+                <!-- Filtre -->
+            <div class="filters mb-3 d-flex align-items-center gap-2">
+    <input type="date" id="filter-date" class="form-control" placeholder="Date diffusion">
+    
+    <select id="filter-societe" class="form-select">
+        <option value="">Toutes les sociétés</option>
+    </select>
+
+    <button id="filter-btn" class="btn btn-primary">Filtrer</button>
+    <button id="reset-btn" class="btn btn-secondary">Reset</button>
+</div>
+
+<table class="table table-striped" id="table1">
+    <thead>
+        <tr>
+            <th>Société</th>
+            <th>Arrêts</th>
+            <th>Date diffusion</th>
+            <th>Code pub</th>
+            <th>Tarif</th>
+        </tr>
+    </thead>
+    <tbody id="diffusions-container"></tbody>
+</table>
+
+<script>
+let dataTable;
+
+async function loadSocietes() {
+    const select = document.getElementById("filter-societe");
+    const res = await fetch("/api/societes");
+    const societes = await res.json();
+    societes.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s.idSociete;
+        opt.textContent = s.nom;
+        select.appendChild(opt);
+    });
+}
+
+async function loadDiffusions(date = "", idSociete = "") {
+    const tbody = document.getElementById("diffusions-container");
+
+    // Construire l'URL dynamiquement en omettant les params vides
+    let url = "/api/publicites/diffusions";
+    const params = new URLSearchParams();
+    if (date) params.append("date", date);
+    if (idSociete) params.append("idSociete", idSociete);
+    if ([...params].length) url += "?" + params.toString();
+
+    const res = await fetch(url);
+    if (!res.ok) return showError("Erreur lors du chargement des diffusions");
+    const diffusions = await res.json();
+
+    tbody.innerHTML = "";
+
+    if (diffusions.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-muted py-4">
+                    Aucune diffusion trouvée
+                </td>
+            </tr>
+        `;
+    } else {
+        diffusions.forEach(d => {
+            const arrets = d.voyage.trajet.arrets
+                .sort((a, b) => a.ordre - b.ordre)
+                .map(a => a.arret.nom)
+                .join(" → ");
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${d.publicite.societe.nom}</td>
+                <td>${arrets}</td>
+                <td>${formatDate(d.dateDiffusion)}</td>
+                <td>${d.publicite.code}</td>
+                <td>${d.tarifMontant ? d.tarifMontant.toFixed(2) : "N/A"}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Initialiser ou réinitialiser la DataTable
+    if (dataTable) dataTable.destroy();
+    dataTable = new simpleDatatables.DataTable("#table1", {
+        perPage: 10,
+        searchable: true,
+        labels: {
+            placeholder: "Rechercher...",
+            noRows: "Aucune diffusion",
+            info: "Affichage de {start} à {end} sur {rows} diffusions"
+        }
+    });
+}
+
+function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
+}
+
+function showError(msg) {
+    Toastify({
+        text: msg,
+        duration: 4000,
+        gravity: "top",
+        position: "right",
+        style: { background: "linear-gradient(to right, #ff5f6d, #ffc371)" },
+        close: true
+    }).showToast();
+}
+
+// Gestion du filtre
+document.getElementById("filter-btn").addEventListener("click", () => {
+    const date = document.getElementById("filter-date").value;
+    const idSociete = document.getElementById("filter-societe").value;
+    loadDiffusions(date, idSociete);
+});
+
+// Reset filtre
+document.getElementById("reset-btn").addEventListener("click", () => {
+    document.getElementById("filter-date").value = "";
+    document.getElementById("filter-societe").value = "";
+    loadDiffusions(); // recharge toutes les diffusions
+});
+
+// Initialisation
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadSocietes();
+    loadDiffusions();
+});
+</script>
+
+
+</body>
+</html>

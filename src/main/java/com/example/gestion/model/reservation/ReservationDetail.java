@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 import com.example.gestion.model.place.PlaceType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.example.gestion.model.client.PassagerType;
 
 @Entity
@@ -17,7 +18,9 @@ public class ReservationDetail {
 
     @ManyToOne
     @JoinColumn(name = "id_reservation", nullable = false)
+    @JsonBackReference
     private Reservation reservation;
+
 
     @ManyToOne
     @JoinColumn(name = "id_place_type", nullable = false)

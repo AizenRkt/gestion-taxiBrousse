@@ -104,3 +104,30 @@ INSERT INTO remise_condition (id_remise, champ, operateur, valeur)
 VALUES
 (4, 'passager_type', '=', 'senior');
 
+
+--publicite
+INSERT INTO societe (nom) VALUES
+('Société Alpha'),
+('Société Beta'),
+('Société Gamma');
+
+INSERT INTO publicite (id_societe, code, description, duree) VALUES
+(1, 'PUB-ALPHA-01', 'Publicité pour le nouveau produit Alpha', 30),
+(1, 'PUB-ALPHA-02', 'Promotion spéciale', 45),
+(2, 'PUB-BETA-01', 'Publicité pour les services Beta', 60),
+(3, 'PUB-GAMMA-01', 'Campagne de lancement Gamma', 25);
+
+
+INSERT INTO diffusion_publicite_voyage (id_publicite, id_voyage, date_diffusion) VALUES
+(1, 1, '2026-01-20 08:00:00'),
+(1, 1, '2026-01-21 14:30:00'),
+(2, 1, '2026-01-22 09:15:00'),
+(3, 1, '2026-01-23 11:00:00'),
+(4, 1, '2026-01-24 16:45:00');
+
+
+INSERT INTO tarif_publicite (montant, date_modif) VALUES
+(1000.00, '2026-01-01'),
+(1200.50, '2026-01-10'),
+(1500.75, '2026-01-15'),
+(2000.00, '2026-01-20');

@@ -111,6 +111,7 @@ CREATE TABLE reservation_detail (
     id_reservation INT REFERENCES reservation(id_reservation),
     id_place_type INT REFERENCES place_type(id_place_type),
     id_passager_type INT REFERENCES passager_type(id_passager_type),
+    prix_applique DECIMAL(10,2) NOT NULL,   
     nombre_places INT NOT NULL
 );
 
@@ -135,4 +136,30 @@ CREATE TABLE remise_condition (
     champ VARCHAR(50),      -- type_passager, place_type, trajet, voyage
     operateur VARCHAR(10), -- =, IN
     valeur VARCHAR(100)    -- enfant, economique, 1
+);
+
+create table societe(
+    id_societe SERIAL PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL
+);
+
+create table publicite(
+    id_publicite SERIAL PRIMARY KEY,
+    id_societe INT REFERENCES societe(id_societe),
+    code VARCHAR(100)  NOT NULL,
+   description TEXT,
+   duree INT NOT NULL
+);
+
+create table diffusion_publicite_voyage(
+    id_publicite_diffusion SERIAL PRIMARY KEY,
+    id_publicite INT REFERENCES publicite(id_publicite),
+    id_voyage INT REFERENCES voyage(id_voyage),
+    date_diffusion TIMESTAMP NOT NULL
+);
+
+create table tarif_publicite(
+    id_tarif_publicite SERIAL PRIMARY KEY,
+    montant DECIMAL(10,2) NOT NULL,
+    date_modif DATE NOT NULL
 );

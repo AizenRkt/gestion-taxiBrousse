@@ -50,3 +50,7 @@ JOIN place_type pt ON pt.id_place_type = pc.id_place_type
 JOIN tarif_place_type tpt ON tpt.id_place_type = pc.id_place_type
 GROUP BY v.id_vehicule, v.immatriculation, v.marque, pt.libelle, pc.nombre_places
 ORDER BY v.id_vehicule, pt.libelle;
+
+
+
+

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Détail du voyage</title>
+
+    <!-- CSS Mazer -->
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app.css}">
+    <link rel="stylesheet" th:href="@{/template/assets/compiled/css/app-dark.css}">
+</head>
+
+<body>
+<div id="app">
+
+    <!-- Sidebar -->
+    <div th:replace="fragments/sidebar :: sidebar"></div>
+
+    <div id="main">
+
+        <!-- Header -->
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <div class="page-heading">
+            <h3>Détails du voyage</h3>
+        </div>
+
+        <div class="page-content">
+
+            <!-- Infos générales -->
+            <div class="card">
+                <div class="card-header">
+                    <h4>Informations générales</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>ID Voyage :</strong> <span id="idVoyage"></span></p>
+                    <p><strong>Date départ :</strong> <span id="dateDepart"></span></p>
+                    <p><strong>Date arrivée :</strong> <span id="dateArrivee"></span></p>
+                </div>
+            </div>
+
+            <!-- Trajet -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Trajet</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Code :</strong> <span id="codeTrajet"></span></p>
+                    <p><strong>Description :</strong> <span id="descriptionTrajet"></span></p>
+                </div>
+            </div>
+
+            <!-- Arrêts -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Arrêts</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped" id="arretsTable">
+                        <thead>
+                        <tr>
+                            <th>Ordre</th>
+                            <th>Nom</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tarifs -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Tarifs</h4>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped" id="tarifsTable">
+                        <thead>
+                        <tr>
+                            <th>Montant</th>
+                            <th>Date</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Véhicule -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Véhicule</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Immatriculation :</strong> <span id="immatriculation"></span></p>
+                    <p><strong>Marque :</strong> <span id="marque"></span></p>
+                    <p><strong>Capacité :</strong> <span id="capacite"></span></p>
+                </div>
+            </div>
+
+            <!-- Chauffeur -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Chauffeur</h4>
+                </div>
+                <div class="card-body">
+                    <p><strong>Nom :</strong> <span id="nomChauffeur"></span></p>
+                    <p><strong>Prénom :</strong> <span id="prenomChauffeur"></span></p>
+                    <p><strong>Date de naissance :</strong> <span id="dateNaissance"></span></p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- JS Mazer -->
+<script th:src="@{/template/assets/static/js/components/dark.js}"></script>
+<script th:src="@{/template/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js}"></script>
+<script th:src="@{/template/assets/compiled/js/app.js}"></script>
+
+<!-- JS Métier -->
+<script>
+    const pathParts = window.location.pathname.split("/").filter(p => p.length > 0);
+    const voyageId = pathParts[pathParts.length - 1];
+
+    async function loadVoyage() {
+        const res = await fetch(`/api/voyages/${voyageId}`);
+        const data = await res.json();
+
+        const v = Array.isArray(data) ? data[0] : data;
+
+        // Infos générales
+        document.getElementById("idVoyage").textContent = v.idVoyage;
+        document.getElementById("dateDepart").textContent = v.dateDepart;
+        document.getElementById("dateArrivee").textContent = v.dateArrivee;
+
+        // Trajet
+        document.getElementById("codeTrajet").textContent = v.trajet.codeTrajet;
+        document.getElementById("descriptionTrajet").textContent = v.trajet.description;
+
+        // Arrêts
+        const arretBody = document.querySelector("#arretsTable tbody");
+        arretBody.innerHTML = "";
+        v.trajet.arrets.forEach(a => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${a.ordre}</td>
+                <td>${a.arret.nom}</td>
+            `;
+            arretBody.appendChild(tr);
+        });
+
+        // Tarifs
+        const tarifBody = document.querySelector("#tarifsTable tbody");
+        tarifBody.innerHTML = "";
+        v.trajet.tarifs.forEach(t => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${t.montant} Ar</td>
+                <td>${t.dateTarif}</td>
+            `;
+            tarifBody.appendChild(tr);
+        });
+
+        // Véhicule
+        document.getElementById("immatriculation").textContent = v.vehicule.immatriculation;
+        document.getElementById("marque").textContent = v.vehicule.marque;
+        document.getElementById("capacite").textContent = v.vehicule.capacitePassager;
+
+        // Chauffeur
+        document.getElementById("nomChauffeur").textContent = v.chauffeur.nom;
+        document.getElementById("prenomChauffeur").textContent = v.chauffeur.prenom;
+        document.getElementById("dateNaissance").textContent = v.chauffeur.dateDeNaissance;
+    }
+
+    loadVoyage();
+</script>
+
+</body>
+</html>
