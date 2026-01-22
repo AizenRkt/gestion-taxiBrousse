@@ -8,7 +8,7 @@ public class RemiseCondition {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idCondition;
+    private Long idRemiseCondition;
 
     @ManyToOne
     @JoinColumn(name = "id_remise")
@@ -20,12 +20,12 @@ public class RemiseCondition {
     @Column(nullable = false)
     private String valeur;
 
-    public Long getIdCondition() {
-        return idCondition;
+    public Long getIdRemiseCondition() {
+        return idRemiseCondition;
     }
 
-    public void setIdCondition(Long idCondition) {
-        this.idCondition = idCondition;
+    public void setIdRemiseCondition(Long idRemiseCondition) {
+        this.idRemiseCondition = idRemiseCondition;
     }
 
     public Remise getRemise() {

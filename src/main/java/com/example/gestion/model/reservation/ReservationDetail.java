@@ -16,12 +16,15 @@ public class ReservationDetail {
     private Long idDetail;
 
     @ManyToOne
+    @JoinColumn(name = "id_reservation", nullable = false)
     private Reservation reservation;
 
     @ManyToOne
+    @JoinColumn(name = "id_place_type", nullable = false)
     private PlaceType placeType;
 
     @ManyToOne
+    @JoinColumn(name = "id_passager_type", nullable = false)
     private PassagerType passagerType;
 
     private int nombrePlaces;

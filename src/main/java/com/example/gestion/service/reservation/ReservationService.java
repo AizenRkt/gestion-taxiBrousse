@@ -145,6 +145,7 @@ public class ReservationService {
             detail.setPlaceType(placeType);      
             detail.setPassagerType(passagerType);
             detail.setNombrePlaces(detDto.getNombrePlaces());
+            detail.setPrixApplique(prixUnitaire); 
 
             // Ajout du détail à la réservation (cascade gérée)
             res.getDetails().add(detail);
