@@ -119,8 +119,8 @@ INSERT INTO publicite (id_societe, code, description, duree) VALUES
 
 
 INSERT INTO diffusion_publicite_voyage (id_publicite, id_voyage, date_diffusion) VALUES
-(1, 1, '2026-01-20 08:00:00'),
 (1, 1, '2026-01-01 08:00:00'),
+(1, 1, '2026-01-20 08:00:00'),
 (1, 1, '2026-01-21 14:30:00'),
 (2, 1, '2026-01-22 09:15:00'),
 (3, 1, '2026-01-23 11:00:00'),
