@@ -212,16 +212,7 @@
                                 <div class="card-body">
                                     <form id="reservation-form" class="form">
                                         <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group mb-4">
-                                                    <label for="nbr-place" class="form-label">Nombre de places <span class="text-danger">*</span></label>
-                                                    <div class="input-group">
-                                                        <span class="input-group-text"><i class="bi bi-people-fill"></i></span>
-                                                        <input type="number" class="form-control" id="nbr-place" name="nbr-place" min="1" max="50" value="1" required>
-                                                    </div>
-                                                    <small class="text-muted">Maximum 50 places par réservation</small>
-                                                </div>
-                                            </div>
+                                            <!-- Nom -->
                                             <div class="col-md-6">
                                                 <div class="form-group mb-4">
                                                     <label for="nom" class="form-label">Nom complet <span class="text-danger">*</span></label>
@@ -231,6 +222,8 @@
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            <!-- Téléphone -->
                                             <div class="col-md-6">
                                                 <div class="form-group mb-4">
                                                     <label for="telephone" class="form-label">Téléphone <span class="text-danger">*</span></label>
@@ -240,20 +233,18 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                              <div class="col-md-6">
-                                                <div class="form-group mb-4">
-                                                    <label for="qualite" class="form-label">Qualites des places <span class="text-danger">*</span></label>
-                                                    <div class="input-group">
-                                                        <span class="input-group-text"><i class="bi bi-telephone-fill"></i></span>
-                                                        <select name="qualite" id="qualite"></select>
-                                                    </div>
-                                                </div>
+
+                                            <!-- Container dynamique pour les types de place / passager -->
+                                            <div class="col-12" id="reservation-details-container">
+                                                <h5>Choisir les places</h5>
+                                                <!-- Les inputs seront injectés ici via JS -->
                                             </div>
                                         </div>
 
-                                        <div class="d-flex justify-content-between align-items-center">
+                                        <!-- Bouton payer -->
+                                        <div class="d-flex justify-content-between align-items-center mt-4">
                                             <button type="submit" class="btn btn-primary btn-lg">
-                                                payer
+                                                <i class="bi bi-credit-card me-2"></i>Payer
                                             </button>
                                         </div>
                                     </form>
@@ -261,52 +252,38 @@
                             </div>
                         </div>
 
-                        <!-- Récapitulatif -->
+                        <!-- Récapitulatif de la commande -->
                         <div class="col-lg-4">
                             <div class="card">
-                                <div class="card-body recap-box p-4">
-                                    <h5 class="text-white mb-4">
+                                <div class="card-header recap-box">
+                                    <h4 class="text-white mb-0">
                                         <i class="bi bi-clipboard-check me-2"></i>Récapitulatif
-                                    </h5>
-
+                                    </h4>
+                                </div>
+                                <div class="card-body">
                                     <div class="recap-item">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span class="text-white-50">Trajet</span>
-                                            <strong class="text-white" id="recap-trajet">--</strong>
-                                        </div>
+                                        <small class="text-muted">Trajet</small>
+                                        <p class="fw-bold mb-0" id="recap-trajet">--</p>
                                     </div>
-
                                     <div class="recap-item">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span class="text-white-50">Date & Heure</span>
-                                            <strong class="text-white" id="recap-date">--</strong>
-                                        </div>
+                                        <small class="text-muted">Date & Heure</small>
+                                        <p class="fw-bold mb-0" id="recap-date">--</p>
                                     </div>
-
                                     <div class="recap-item">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span class="text-white-50">Nombre de places</span>
-                                            <strong class="text-white" id="recap-places">1</strong>
-                                        </div>
+                                        <small class="text-muted">Nombre de places</small>
+                                        <p class="fw-bold mb-0" id="recap-places">0</p>
                                     </div>
-
                                     <div class="recap-item">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span class="text-white-50">Prix unitaire</span>
-                                            <strong class="text-white" id="recap-prix-unit">--</strong>
-                                        </div>
+                                        <small class="text-muted">Prix unitaire</small>
+                                        <p class="fw-bold mb-0" id="recap-prix-unit">-- Ar</p>
                                     </div>
-
-                                    <div class="mt-4 pt-3 border-top border-white">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <h5 class="text-white mb-0">Total à payer</h5>
-                                            <h4 class="text-white mb-0" id="recap-prix-total">--</h4>
-                                        </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">Total</h5>
+                                        <h4 class="price-badge mb-0" id="recap-prix-total">0 Ar</h4>
                                     </div>
-
                                 </div>
                             </div>
-
                         </div>
                     </section>
 
@@ -323,116 +300,162 @@
 
     <!-- Script personnalisé -->
     <script>
-        let prixUnitaire = 0;
+    let prixUnitaire = 0;
 
-        async function initConfirmationPage() {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const id = urlParams.get('id');
-                if (!id) throw new Error("ID du voyage manquant.");
+    // Génère dynamiquement les inputs pour chaque type de place et type de passager
+    function initReservationDetails(voyage) {
+        const container = document.getElementById('reservation-details-container');
+        container.innerHTML = '<h5 class="mb-3">Choisir les places</h5>'; // Reset
 
-                // Fetch du voyage
-                const res = await fetch(`/api/voyages/${id}`);
-                if (!res.ok) throw new Error("Impossible de récupérer le voyage.");
-                const voyage = await res.json();
+        voyage.trajet.placeTypes.forEach(placeType => {
+            voyage.trajet.passagerTypes.forEach(passagerType => {
+                const div = document.createElement('div');
+                div.className = "form-group mb-3";
 
-                // Extraire les informations
-                const arrets = voyage.trajet.arrets.sort((a,b) => a.ordre - b.ordre);
-                const depart = arrets[0].arret.nom;
-                const arrivee = arrets[arrets.length - 1].arret.nom;
-                const dateHeure = new Date(voyage.dateDepart).toLocaleString('fr-FR', { 
-                    dateStyle: 'short', 
-                    timeStyle: 'short' 
-                });
-                const voiture = `${voyage.vehicule.marque} ${voyage.vehicule.modele || ''} (${voyage.vehicule.immatriculation})`;
-                prixUnitaire = voyage.trajet.tarifs[0]?.montant || 0;
+                div.innerHTML = `
+                    <label>${placeType.nom} - ${passagerType.nom}</label>
+                    <input type="number" min="0" value="0"
+                        class="form-control detail-input"
+                        data-id-place="${placeType.id}"
+                        data-id-passager="${passagerType.id}"
+                        placeholder="Nombre de places">
+                `;
+                container.appendChild(div);
+            });
+        });
 
-                // Remplir les stats cards
-                document.getElementById('stat-depart').textContent = depart;
-                document.getElementById('stat-arrivee').textContent = arrivee;
-                document.getElementById('stat-date').textContent = dateHeure;
-                document.getElementById('stat-prix').textContent = `${prixUnitaire.toLocaleString('fr-FR')} Ar`;
+        // Listener sur tous les inputs pour recalculer le total
+        document.querySelectorAll('.detail-input').forEach(input => {
+            input.addEventListener('input', updateRecapTotal);
+        });
+    }
 
-                // Info véhicule
-                document.getElementById('vehicle-info').innerHTML = 
-                    `<strong>${voiture}</strong> - ${voyage.vehicule.capacitePassager || 'N/A'} places`;
+    // Met à jour le récapitulatif des places et du total
+    function updateRecapTotal() {
+        const details = Array.from(document.querySelectorAll('.detail-input'))
+            .map(input => ({
+                montant: prixUnitaire,
+                nombre: Number(input.value) || 0
+            }));
+        
+        const total = details.reduce((acc, d) => acc + d.montant * d.nombre, 0);
+        document.getElementById('recap-prix-total').textContent = `${total.toLocaleString('fr-FR')} Ar`;
 
-                // Récapitulatif
-                document.getElementById('recap-trajet').textContent = `${depart} → ${arrivee}`;
-                document.getElementById('recap-date').textContent = dateHeure;
-                document.getElementById('recap-prix-unit').textContent = `${prixUnitaire.toLocaleString('fr-FR')} Ar`;
-                updateRecapTotal();
+        const totalPlaces = details.reduce((acc, d) => acc + d.nombre, 0);
+        document.getElementById('recap-places').textContent = totalPlaces;
+    }
 
-                // Listener sur le nombre de places
-                document.getElementById('nbr-place').addEventListener('input', (e) => {
-                    const nbr = parseInt(e.target.value) || 1;
-                    document.getElementById('recap-places').textContent = nbr;
-                    updateRecapTotal();
-                });
+    // Initialise la page de confirmation
+    async function initConfirmationPage() {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (!id) throw new Error("ID du voyage manquant.");
 
-                // Gestion du formulaire
-                const form = document.getElementById('reservation-form');
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    const btn = form.querySelector('button[type="submit"]');
-                    btn.disabled = true;
-                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Traitement...';
+            // Fetch du voyage
+            const res = await fetch(`/api/voyages/${id}`);
+            if (!res.ok) throw new Error("Impossible de récupérer le voyage.");
+            const voyage = await res.json();
 
-                    const nom = document.getElementById('nom').value;
-                    const telephone = document.getElementById('telephone').value;
-                    const nbrPlace = Number(document.getElementById('nbr-place').value);
+            // Infos trajet
+            const arrets = voyage.trajet.arrets.sort((a,b) => a.ordre - b.ordre);
+            const depart = arrets[0].arret.nom;
+            const arrivee = arrets[arrets.length - 1].arret.nom;
+            const dateHeure = new Date(voyage.dateDepart).toLocaleString('fr-FR', { 
+                dateStyle: 'short', timeStyle: 'short' 
+            });
+            const voiture = `${voyage.vehicule.marque} ${voyage.vehicule.modele || ''} (${voyage.vehicule.immatriculation})`;
+            
+            // Prix unitaire - adaptez selon votre structure de données
+            prixUnitaire = voyage.prixParPlace || voyage.trajet.tarifs?.[0]?.montant || 0;
 
-                    const payload = {
-                        idVoyage: voyage.idVoyage,
-                        clientNom: nom,
-                        clientTelephone: telephone,
-                        nombrePlaces: nbrPlace,
-                        totalPayer: voyage.trajet.tarifs[0].montant * nbrPlace
-                    };
+            // Remplir les stats cards
+            document.getElementById('stat-depart').textContent = depart;
+            document.getElementById('stat-arrivee').textContent = arrivee;
+            document.getElementById('stat-date').textContent = dateHeure;
+            document.getElementById('stat-prix').textContent = `${prixUnitaire.toLocaleString('fr-FR')} Ar`;
 
-                    try {
-                        const resPost = await fetch('/api/reservations/achat', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
+            // Info véhicule
+            document.getElementById('vehicle-info').innerHTML = 
+                `<strong>${voiture}</strong> - ${voyage.vehicule.capacitePassager || 'N/A'} places`;
 
-                        if (resPost.ok) {
-                            // Success animation
-                            btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Confirmé !';
-                            btn.classList.remove('btn-primary');
-                            btn.classList.add('btn-success');
-                            
-                            setTimeout(() => {
-                                window.location.href = '/mes-reservations';
-                            }, 1500);
-                        } else {
-                            const err = await resPost.json();
-                            alert('Erreur : ' + (err.message || 'Impossible de réserver.'));
-                            btn.disabled = false;
-                            btn.innerHTML = '<i class="bi bi-credit-card me-2"></i>Procéder au Paiement';
-                        }
-                    } catch (error) {
-                        alert('Erreur réseau : ' + error.message);
+            // Récapitulatif
+            document.getElementById('recap-trajet').textContent = `${depart} → ${arrivee}`;
+            document.getElementById('recap-date').textContent = dateHeure;
+            document.getElementById('recap-prix-unit').textContent = `${prixUnitaire.toLocaleString('fr-FR')} Ar`;
+
+            // Initialiser les inputs dynamiques
+            initReservationDetails(voyage);
+            updateRecapTotal();
+
+            // Gestion du formulaire
+            const form = document.getElementById('reservation-form');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const btn = form.querySelector('button[type="submit"]');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Traitement...';
+
+                const nom = document.getElementById('nom').value;
+                const telephone = document.getElementById('telephone').value;
+
+                // Récupérer les détails dynamiques
+                const details = Array.from(document.querySelectorAll('.detail-input'))
+                    .map(input => ({
+                        idPlaceType: Number(input.dataset.idPlace),
+                        idPassagerType: Number(input.dataset.idPassager),
+                        nombrePlaces: Number(input.value) || 0
+                    }))
+                    .filter(d => d.nombrePlaces > 0);
+
+                if (details.length === 0) {
+                    alert("Veuillez sélectionner au moins une place.");
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-credit-card me-2"></i>Payer';
+                    return;
+                }
+
+                const payload = {
+                    idVoyage: voyage.idVoyage,
+                    clientNom: nom,
+                    clientTel: telephone,
+                    details: details
+                };
+
+                try {
+                    const resPost = await fetch('/api/reservations/achat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (resPost.ok) {
+                        btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Confirmé !';
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-success');
+                        setTimeout(() => window.location.href = '/mes-reservations', 1500);
+                    } else {
+                        const err = await resPost.json();
+                        alert('Erreur : ' + (err.message || 'Impossible de réserver.'));
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="bi bi-credit-card me-2"></i>Procéder au Paiement';
+                        btn.innerHTML = '<i class="bi bi-credit-card me-2"></i>Payer';
                     }
-                });
+                } catch (error) {
+                    alert('Erreur réseau : ' + error.message);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-credit-card me-2"></i>Payer';
+                }
+            });
 
-            } catch(err) {
-                alert("Erreur: " + err.message);
-                console.error(err);
-            }
+        } catch(err) {
+            alert("Erreur: " + err.message);
+            console.error(err);
         }
+    }
 
-        function updateRecapTotal() {
-            const nbr = parseInt(document.getElementById('nbr-place').value) || 1;
-            const total = prixUnitaire * nbr;
-            document.getElementById('recap-prix-total').textContent = `${total.toLocaleString('fr-FR')} Ar`;
-        }
-
-        document.addEventListener('DOMContentLoaded', initConfirmationPage);
+    document.addEventListener('DOMContentLoaded', initConfirmationPage);
     </script>
+
 </body>
 </html>

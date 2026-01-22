@@ -4,6 +4,7 @@ import com.example.gestion.model.reservation.Reservation;
 import com.example.gestion.model.voyage.Voyage;
 import com.example.gestion.service.reservation.ReservationService;
 import com.example.gestion.service.voyage.VoyageService;
+import com.example.gestion.dto.reservation.ReservationRequestDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,27 +34,35 @@ public class ReservationApiController {
     }
 
     @PostMapping("/achat")
-    public ResponseEntity<Reservation> achatBillet(@RequestBody Map<String, Object> body) {
-
-        Long idVoyage = Long.valueOf(body.get("idVoyage").toString());
-        String clientNom = body.get("clientNom").toString();
-        String clientTelephone = body.get("clientTelephone").toString();
-        Integer nombrePlaces = Integer.valueOf(body.get("nombrePlaces").toString());
-        BigDecimal totalPayer = BigDecimal.valueOf(Double.valueOf(body.get("totalPayer").toString()));
-
-        Voyage voyage = voyageService.getVoyageById(idVoyage)
-                .orElseThrow(() -> new RuntimeException("Voyage introuvable"));
-
-        Reservation reservation = new Reservation();
-        reservation.setVoyage(voyage);
-        reservation.setClientNom(clientNom);
-        reservation.setClientTel(clientTelephone);
-        reservation.setNombrePlaces(nombrePlaces);
-        reservation.setTotalPayer(totalPayer);
-        reservation.setDateReservation(LocalDateTime.now());
-
-        Reservation saved = reservationService.save(reservation);
-
+    public ResponseEntity<Reservation> achatBillet(@RequestBody ReservationRequestDTO dto) {
+        Reservation saved = reservationService.creerReservation(dto);
         return ResponseEntity.ok(saved);
     }
+
+    // @PostMapping("/achat")
+    // public ResponseEntity<Reservation> achatBillet(@RequestBody Map<String, Object> body) {
+
+    //     Long idVoyage = Long.valueOf(body.get("idVoyage").toString());
+    //     String clientNom = body.get("clientNom").toString();
+    //     String clientTelephone = body.get("clientTelephone").toString();
+    //     Integer nombrePlaces = Integer.valueOf(body.get("nombrePlaces").toString());
+    //     BigDecimal totalPayer = BigDecimal.valueOf(Double.valueOf(body.get("totalPayer").toString()));
+
+    //     Voyage voyage = voyageService.getVoyageById(idVoyage)
+    //             .orElseThrow(() -> new RuntimeException("Voyage introuvable"));
+
+    //     Reservation reservation = new Reservation();
+    //     reservation.setVoyage(voyage);
+    //     reservation.setClientNom(clientNom);
+    //     reservation.setClientTel(clientTelephone);
+    //     reservation.setNombrePlaces(nombrePlaces);
+    //     reservation.setTotalPayer(totalPayer);
+    //     reservation.setDateReservation(LocalDateTime.now());
+
+    //     Reservation saved = reservationService.save(reservation);
+
+    //     return ResponseEntity.ok(saved);
+    // }
+
+
 }

@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import jakarta.persistence.*;
-import com.example.gestion.model.trajet.TrajetTarif;
+// import com.example.gestion.model.trajet.TrajetTarif;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -27,10 +27,10 @@ public class Trajet {
     @JsonManagedReference
     private List<TrajetArret> arrets;
 
-    @OneToMany(mappedBy = "trajet", cascade = CascadeType.ALL)
-    @OrderBy("dateTarif DESC")
-    @JsonManagedReference
-    private List<TrajetTarif> tarifs;
+    // @OneToMany(mappedBy = "trajet", cascade = CascadeType.ALL)
+    // @OrderBy("dateTarif DESC")
+    // @JsonManagedReference
+    // private List<TrajetTarif> tarifs;
   
     @Transient
     private BigDecimal chiffreAffaire;
@@ -75,11 +75,11 @@ public class Trajet {
         this.arrets = arrets;
     }
 
-    public List<TrajetTarif> getTarifs() {
-        return tarifs;
-    }
+    // public List<TrajetTarif> getTarifs() {
+    //     return tarifs;
+    // }
 
-    public void setTarifs(List<TrajetTarif> tarifs) {
-        this.tarifs = tarifs;
-    }
+    // public void setTarifs(List<TrajetTarif> tarifs) {
+    //     this.tarifs = tarifs;
+    // }
 }

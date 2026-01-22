@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "reservation")
@@ -33,6 +34,9 @@ public class Reservation {
 
     @Column(name = "date_reservation")
     private LocalDateTime dateReservation;
+
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReservationDetail> details;
 
     // ===== Lifecycle =====
     @PrePersist
@@ -98,5 +102,13 @@ public class Reservation {
 
     public void setTotalPayer(BigDecimal totalPayer) {
         this.totalPayer = totalPayer;
+    }
+
+    public List<ReservationDetail> getDetails() {
+        return details;
+    }
+    
+    public void setDetails(List<ReservationDetail> details) {
+        this.details = details;
     }
 }

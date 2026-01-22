@@ -1,0 +1,38 @@
+-- génération de place scripte 
+-- -- 6 places Premium
+-- DO $$
+-- DECLARE i INT;
+-- BEGIN
+--   FOR i IN 1..6 LOOP
+--     INSERT INTO place (code) VALUES ('P' || i);
+--     INSERT INTO vehicule_place (id_vehicule, id_place, id_place_type)
+--     VALUES (5, currval('place_id_place_seq'), 2);
+--   END LOOP;
+-- END $$;
+
+-- -- 10 places Standard
+-- DO $$
+-- DECLARE i INT;
+-- BEGIN
+--   FOR i IN 1..10 LOOP
+--     INSERT INTO place (code) VALUES ('S' || i);
+--     INSERT INTO vehicule_place (id_vehicule, id_place, id_place_type)
+--     VALUES (5, currval('place_id_place_seq'), 1);
+--   END LOOP;
+-- END $$;
+
+-- -- 2 places VIP
+-- DO $$
+-- DECLARE i INT;
+-- BEGIN
+--   FOR i IN 1..2 LOOP
+--     INSERT INTO place (code) VALUES ('V' || i);
+--     INSERT INTO vehicule_place (id_vehicule, id_place, id_place_type)
+--     VALUES (5, currval('place_id_place_seq'), 3);
+--   END LOOP;
+-- END $$;
+
+-- UPDATE tarif_place_type
+-- SET montant = 90000.00,
+--     date_tarif = '2026-01-20'
+-- WHERE id_tarif_place_type = 1;

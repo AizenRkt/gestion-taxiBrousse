@@ -80,6 +80,12 @@ create table tarif_place_type(
     date_tarif DATE NOT NULL
 );
 
+-- passager
+CREATE TABLE passager_type (
+    id_passager_type SERIAL PRIMARY KEY,
+    libelle VARCHAR(50) NOT NULL
+);
+
 -- voyage 
 CREATE TABLE voyage (
     id_voyage SERIAL PRIMARY KEY,
@@ -98,4 +104,35 @@ CREATE TABLE reservation (
     nombre_places INT NOT NULL,
     total_payer DECIMAL(10, 2) NOT NULL,
     date_reservation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE reservation_detail (
+    id_reservation_detail SERIAL PRIMARY KEY,
+    id_reservation INT REFERENCES reservation(id_reservation),
+    id_place_type INT REFERENCES place_type(id_place_type),
+    id_passager_type INT REFERENCES passager_type(id_passager_type),
+    nombre_places INT NOT NULL
+);
+
+-- remise
+CREATE TABLE remise_type (
+    id_remise_type SERIAL PRIMARY KEY,
+    libelle VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE remise (
+    id_remise SERIAL PRIMARY KEY,
+    id_type_remise INT REFERENCES remise_type(id_remise_type),
+    libelle VARCHAR(100),
+    valeur DECIMAL(10,2),
+    date_debut DATE,
+    date_fin DATE
+); 
+
+CREATE TABLE remise_condition (
+    id_remise_condition SERIAL PRIMARY KEY, 
+    id_remise INT REFERENCES remise(id_remise),
+    champ VARCHAR(50),      -- type_passager, place_type, trajet, voyage
+    operateur VARCHAR(10), -- =, IN
+    valeur VARCHAR(100)    -- enfant, economique, 1
 );

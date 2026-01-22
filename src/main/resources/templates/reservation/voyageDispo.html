@@ -103,7 +103,6 @@
                                     <th>Arrivée</th>
                                     <th>Date & Heure</th>
                                     <th>Voiture</th>
-                                    <th>Prix / pkace </th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -201,7 +200,6 @@ function afficherVoyages(voyages) {
                 </span>
                 ${v.vehicule.marque} - ${v.vehicule.immatriculation}
             </td>
-            <td class="text-muted">${v.trajet.tarifs[0].montant} ar</td>
             <td>
                 <a href="/reservations/voyage/confirmation?id=${v.idVoyage}">
                     <button class="btn btn-sm btn-primary">
