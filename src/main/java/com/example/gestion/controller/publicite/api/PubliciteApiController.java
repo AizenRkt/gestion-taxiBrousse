@@ -115,4 +115,18 @@ public class PubliciteApiController {
 
         return publiciteService.getCAPub(diffusions);
     }
+
+    @GetMapping("/reste")
+    public BigDecimal getResteAPayer(
+            @RequestParam int annee,
+            @RequestParam int mois,
+            @RequestParam int idSociete) {
+
+        Societe societe = societeRepository
+                .findById(idSociete)
+                .orElseThrow(() -> new RuntimeException("Société introuvable"));
+
+        return publiciteService.getResteAPayerMensuel(societe, annee, mois);
+    }
+
 }

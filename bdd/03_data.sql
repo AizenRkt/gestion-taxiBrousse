@@ -120,6 +120,7 @@ INSERT INTO publicite (id_societe, code, description, duree) VALUES
 
 INSERT INTO diffusion_publicite_voyage (id_publicite, id_voyage, date_diffusion) VALUES
 (1, 1, '2026-01-20 08:00:00'),
+(1, 1, '2026-01-01 08:00:00'),
 (1, 1, '2026-01-21 14:30:00'),
 (2, 1, '2026-01-22 09:15:00'),
 (3, 1, '2026-01-23 11:00:00'),
@@ -131,3 +132,6 @@ INSERT INTO tarif_publicite (montant, date_modif) VALUES
 (1200.50, '2026-01-10'),
 (1500.75, '2026-01-15'),
 (2000.00, '2026-01-20');
+
+-- alea reste à payer 
+INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(1, 2000, '2026-01-12');

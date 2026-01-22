@@ -138,6 +138,7 @@ CREATE TABLE remise_condition (
     valeur VARCHAR(100)    -- enfant, economique, 1
 );
 
+-- publicite
 create table societe(
     id_societe SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL
@@ -162,4 +163,11 @@ create table tarif_publicite(
     id_tarif_publicite SERIAL PRIMARY KEY,
     montant DECIMAL(10,2) NOT NULL,
     date_modif DATE NOT NULL
+);
+
+CREATE TABLE paiement_publicite (
+    id_paiement_publicite SERIAL PRIMARY KEY,
+    id_societe INT REFERENCES societe(id_societe),
+    montant DECIMAL(10,2) NOT NULL,
+    date_paiement DATE NOT NULL
 );
