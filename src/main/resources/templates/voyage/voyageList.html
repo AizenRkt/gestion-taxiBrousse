@@ -81,6 +81,9 @@
                                 <th>Montant genere par ticket</th>
                                 <th>Mnotant genere par diffusion de pubicite</th>
                                 <th>Montant de CA total</th>
+                                <th>Montant paye total diffusion</th>
+                                <th>Reste a payer total diffusion</th>
+                                
 
                             </tr>
                             </thead>
@@ -160,6 +163,16 @@ async function loadVoyages() {
                 } catch (err) {
                     console.error("Erreur récupération CA publicités pour voyage", v.idVoyage, err);
                 }
+                    // Récupérer le montant payé total par les sociétés pour ce voyage
+                    let montantPaye = 0;
+                    try {
+                        const paiementRes = await fetch(`/api/publicites/montantSocietes?idVoyage=${v.idVoyage}&date=${v.dateDepart}`);
+                        if (paiementRes.ok) {
+                            montantPaye = await paiementRes.json(); // Retour BigDecimal côté backend
+                        }
+                    } catch (err) {
+                        console.error("Erreur récupération montant payé diffusion pour voyage", v.idVoyage, err);
+                    }
 
                 // Calcul du CA total
                 const caTotal = caTickets + caPub;
@@ -180,7 +193,11 @@ async function loadVoyages() {
                     </td>
                     <td>${caTickets ? caTickets.toFixed(2) : "0.00"}</td> <!-- CA tickets -->
                     <td>${caPub ? caPub.toFixed(2) : "0.00"}</td>          <!-- CA publicités -->
-                    <td>${caTotal.toFixed(2)}</td>                         <!-- CA total -->
+                    <td>${caTotal.toFixed(2)}</td>             
+                    <td>${montantPaye ? montantPaye.toFixed(2) : "0.00"}</td> <!-- Montant payé total diffusion -->
+            <!-- CA total -->
+                    <td>${caPub - montantPaye}</td>          <!-- CA publicités -->
+                    
                 `;
                 tbody.appendChild(tr);
             }

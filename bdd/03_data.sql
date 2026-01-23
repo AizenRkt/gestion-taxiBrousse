@@ -143,7 +143,7 @@ INSERT INTO societe (nom) VALUES
 ('Socobis');
 
 INSERT INTO publicite (id_societe, code, description, duree) VALUES
-(1, 'PUB-vaniala-01', 'Publicité pour le nouveau produit vaniala', 30),
+(1, 'PUB-vaniala-01', 'Publicité pour le nouveau produit vaniala', 30), 
 (2, 'PUB-lewis-01', 'Promotion spéciale', 45),
 (4, 'PUB-socobis-01', 'Publicité pour les services socobis', 60),
 (4, 'PUB-socobis-02', 'Publicité pour les services socobis', 60),
@@ -160,7 +160,11 @@ INSERT INTO diffusion_publicite_voyage (id_publicite, id_voyage, date_diffusion)
 
 
 INSERT INTO tarif_publicite (montant, date_modif) VALUES
-(200, '2026-01-01');
+(100000, '2026-01-01');
 
--- alea reste à payer 
--- INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(1, 2000, '2026-01-12');
+alea reste à payer 
+INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(1, 50000, '2026-01-13');
+INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(2, 200, '2026-01-14');
+INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(4, 400, '2026-01-14');
+INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(3, 200, '2026-01-14');
+INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(3, 200, '2026-01-14');

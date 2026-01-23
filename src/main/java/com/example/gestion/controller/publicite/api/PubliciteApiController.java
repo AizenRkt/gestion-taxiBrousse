@@ -12,6 +12,7 @@ import com.example.gestion.model.voyage.Voyage;
 import com.example.gestion.repository.voyage.VoyageRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.math.BigDecimal;
 
@@ -200,6 +201,43 @@ public List<DiffusionPubliciteVoyage> getDiffusionsByVoyage(
 
     return diffusions;
 }
+
+@GetMapping("/montantSocietes")
+public BigDecimal getMontantTotalSocietes(
+        @RequestParam Integer idVoyage,
+        @RequestParam String date // format attendu : yyyy-MM-dd ou yyyy-MM-ddTHH:mm:ss
+) {
+    LocalDateTime dateTime;
+
+    // Essaye de parser le datetime complet (yyyy-MM-ddTHH:mm:ss)
+    try {
+        dateTime = LocalDateTime.parse(date);
+    } catch (DateTimeParseException e) {
+        // Si échec, parse seulement la date (yyyy-MM-dd)
+        dateTime = LocalDate.parse(date).atStartOfDay();
+    }
+
+    // Début du mois
+    LocalDateTime debut = dateTime.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+    // Début du mois suivant (fin du mois courant)
+    LocalDateTime fin = debut.plusMonths(1);
+
+    Voyage voyage = voyageRepository.findById(idVoyage.longValue()).orElse(null);
+    if (voyage == null) {
+        return BigDecimal.ZERO;
+    }
+
+    // Récupère les diffusions pour ce voyage et cette période
+    List<DiffusionPubliciteVoyage> diffusions = publiciteService.getDiffusionsByVoyage(voyage, debut, fin);
+
+    // Calcule le total payé par les sociétés pour ce voyage
+    BigDecimal total = publiciteService.MontantPayeSocietes(diffusions);
+
+    return total;
+}
+
+
 
 
 

@@ -9,12 +9,15 @@ import org.springframework.stereotype.Service;
 import com.example.gestion.model.voyage.Voyage;
 import com.example.gestion.repository.publicite.PaiementPubliciteRepository;
 import com.example.gestion.model.publicite.PaiementPublicite;
-
+import com.example.gestion.model.publicite.Publicite;
+import java.util.Objects;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-
+import java.util.stream.Collectors;
+import java.util.Set;
 @Service
 public class PubliciteService {
 
@@ -118,7 +121,34 @@ public class PubliciteService {
                 .toList();
     }
 
+   public List<Societe> getSocietesByDiffusionVoyage(List<DiffusionPubliciteVoyage> diffusions) {
+    if (diffusions == null || diffusions.isEmpty()) {
+        return List.of(); // retourne une liste vide si aucune diffusion
+    }
 
+    // Utilisation d'un Set pour éviter les doublons
+    Set<Societe> societes = diffusions.stream()
+            .map(DiffusionPubliciteVoyage::getPublicite) // récupérer la publicité
+            .filter(Objects::nonNull)
+            .map(Publicite::getSociete) // récupérer la société de chaque pub
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
 
+    // Retourner en List
+    return new ArrayList<>(societes);
+}
+
+            public BigDecimal MontantPayeSocietes(List<DiffusionPubliciteVoyage> diffusions) {
+        // Récupérer toutes les sociétés uniques ayant diffusé des pubs
+        List<Societe> societes = getSocietesByDiffusionVoyage(diffusions);
+
+        // Calculer la somme des paiements pour chaque société
+        BigDecimal total = societes.stream()
+                .map(s -> getPaiementMensuel(s, diffusions.get(0).getDateDiffusion().getYear(), diffusions.get(0).getDateDiffusion().getMonthValue()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return total;
+    }
 
 }
+
