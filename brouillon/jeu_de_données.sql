@@ -32,3 +32,15 @@ curl -X POST http://localhost:8080/api/reservations/achat \
     ]
   }'
 
+
+curl -X GET "http://localhost:8080/api/publicites/diffusionsByVoyage?date=2026-01-01&idVoyage=1"
+
+curl http://localhost:8080/api/publicites/diffusionsByVoyage
+
+curl -X GET "http://localhost:8080/api/publicites/diffusionsByVoyage?annee=2026&mois=1&idVoyage=1" \
+     -H "Accept: application/json"
+
+/api/publicites/caVoyage?idVoyage=1
+
+curl -X GET "http://localhost:8080/api/reservations/caByVoyage?idVoyage=1" \
+     -H "Accept: application/json"

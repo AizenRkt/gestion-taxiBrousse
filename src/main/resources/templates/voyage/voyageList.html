@@ -75,10 +75,13 @@
                             <thead>
                             <tr>
                                 <th>Date départ</th>
-                                <th>Date arrivée</th>
                                 <th>Trajet</th>
                                 <th>Arrêts</th>
                                 <th>Véhicule</th>
+                                <th>Montant genere par ticket</th>
+                                <th>Mnotant genere par diffusion de pubicite</th>
+                                <th>Montant de CA total</th>
+
                             </tr>
                             </thead>
                             <tbody id="voyages-container">
@@ -121,13 +124,14 @@ async function loadVoyages() {
         if (voyages.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-4">
+                    <td colspan="7" class="text-center text-muted py-4">
                         Aucun voyage trouvé
                     </td>
                 </tr>
             `;
         } else {
-            voyages.forEach(v => {
+            // On boucle sur chaque voyage
+            for (const v of voyages) {
 
                 // Arrêts triés par ordre
                 const arrets = v.trajet.arrets
@@ -135,10 +139,34 @@ async function loadVoyages() {
                     .map(a => a.arret.nom)
                     .join(" → ");
 
+                // Récupérer le CA généré par les tickets via l'API réservation
+                let caTickets = 0;
+                try {
+                    const ticketsRes = await fetch(`/api/reservations/caByVoyage?idVoyage=${v.idVoyage}`);
+                    if (ticketsRes.ok) {
+                        caTickets = await ticketsRes.json(); // Retour BigDecimal côté backend
+                    }
+                } catch (err) {
+                    console.error("Erreur récupération CA tickets pour voyage", v.idVoyage, err);
+                }
+
+                // Récupérer le CA généré par les publicités
+                let caPub = 0;
+                try {
+                    const caRes = await fetch(`/api/publicites/caVoyage?idVoyage=${v.idVoyage}`);
+                    if (caRes.ok) {
+                        caPub = await caRes.json();
+                    }
+                } catch (err) {
+                    console.error("Erreur récupération CA publicités pour voyage", v.idVoyage, err);
+                }
+
+                // Calcul du CA total
+                const caTotal = caTickets + caPub;
+
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
                     <td>${formatDate(v.dateDepart)}</td>
-                    <td>${formatDate(v.dateArrivee)}</td>
                     <td>
                         <strong>${v.trajet.codeTrajet}</strong><br>
                         <small class="text-muted">${v.trajet.description}</small>
@@ -148,11 +176,14 @@ async function loadVoyages() {
                         <span class="badge bg-light-primary me-1">
                             #${v.vehicule.idVehicule}
                         </span>
-                        ${v.vehicule.marque}
+                        ${v.vehicule.immatriculation}
                     </td>
+                    <td>${caTickets ? caTickets.toFixed(2) : "0.00"}</td> <!-- CA tickets -->
+                    <td>${caPub ? caPub.toFixed(2) : "0.00"}</td>          <!-- CA publicités -->
+                    <td>${caTotal.toFixed(2)}</td>                         <!-- CA total -->
                 `;
                 tbody.appendChild(tr);
-            });
+            }
         }
 
         spinner.style.display = "none";
@@ -175,6 +206,7 @@ async function loadVoyages() {
         console.error(err);
     }
 }
+
 
 function formatDate(dateStr) {
     const d = new Date(dateStr);

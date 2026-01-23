@@ -14,7 +14,7 @@ public class ReservationDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idDetail;
+    private Long idReservationDetail;
 
     @ManyToOne
     @JoinColumn(name = "id_reservation", nullable = false)
@@ -36,11 +36,11 @@ public class ReservationDetail {
     private BigDecimal prixApplique;
 
     public Long getIdDetail() {
-        return idDetail;
+        return idReservationDetail;
     }
 
-    public void setIdDetail(Long idDetail) {
-        this.idDetail = idDetail;
+    public void setIdDetail(Long idReservationDetail) {
+        this.idReservationDetail = idReservationDetail;
     }
 
     public Reservation getReservation() {

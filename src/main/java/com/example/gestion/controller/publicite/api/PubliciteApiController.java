@@ -8,7 +8,8 @@ import com.example.gestion.repository.publicite.TarifPubliciteRepository;
 import com.example.gestion.repository.societe.SocieteRepository;
 import com.example.gestion.service.publicite.PubliciteService;
 import org.springframework.web.bind.annotation.*;
-
+import com.example.gestion.model.voyage.Voyage;
+import com.example.gestion.repository.voyage.VoyageRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,15 +21,18 @@ public class PubliciteApiController {
 
     private final PubliciteRepository publiciteRepository;
     private final SocieteRepository societeRepository;
+    private final VoyageRepository voyageRepository;
     private final PubliciteService publiciteService;
     private final TarifPubliciteRepository tarifPubliciteRepository;
 
     public PubliciteApiController(PubliciteRepository publiciteRepository,
                                   SocieteRepository societeRepository,
+                                  VoyageRepository voyageRepository,
                                   PubliciteService publiciteService,
                                   TarifPubliciteRepository tarifPubliciteRepository) {
         this.publiciteRepository = publiciteRepository;
         this.societeRepository = societeRepository;
+        this.voyageRepository = voyageRepository;
         this.publiciteService = publiciteService;
         this.tarifPubliciteRepository = tarifPubliciteRepository;
     }
@@ -116,6 +120,30 @@ public class PubliciteApiController {
         return publiciteService.getCAPub(diffusions);
     }
 
+     @GetMapping("/caVoyage")
+    public BigDecimal getCAPubliciteByIdVoyage(
+            @RequestParam(required = false) String date,
+            @RequestParam(required = false) Integer idVoyage) {
+
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+
+        if (date != null && !date.isEmpty()) {
+            LocalDate localDate = LocalDate.parse(date);
+            start = localDate.atStartOfDay();
+            end = localDate.plusDays(30).atStartOfDay();
+        }
+
+        Voyage voyage = null;
+        if (idVoyage != null) {
+            voyage = voyageRepository.findById(idVoyage.longValue()).orElse(null);
+        }
+
+        List<DiffusionPubliciteVoyage> diffusions =
+                publiciteService.getDiffusionsByVoyage(voyage, start, end);
+        return publiciteService.getCAPub(diffusions);
+    }
+
     @GetMapping("/reste")
     public BigDecimal getResteAPayer(
             @RequestParam int annee,
@@ -128,5 +156,53 @@ public class PubliciteApiController {
 
         return publiciteService.getResteAPayerMensuel(societe, annee, mois);
     }
+
+            /**
+         * Diffusions par voyage et par mois (avec tarif)
+         * Exemple:
+         *   /api/publicites/diffusionsByVoyage?date=2026-01-01&idVoyage=1
+         */
+        @GetMapping("/diffusionsByVoyage")
+public List<DiffusionPubliciteVoyage> getDiffusionsByVoyage(
+        @RequestParam(required = false) String date,
+        @RequestParam(required = false) Integer idVoyage) {
+
+    LocalDateTime start = null;
+    LocalDateTime end = null;
+
+    // Si une date est fournie, on crée la plage de la journée entière
+    if (date != null && !date.isEmpty()) {
+
+        LocalDate localDate = LocalDate.parse(date); // format attendu : yyyy-MM-dd
+        start = localDate.atStartOfDay();
+        end = localDate.plusDays(30).atStartOfDay();
+        System.out.println("Start: " + start + ", End: " + end);
+    }
+
+    Voyage voyage = null;
+    System.out.println("idVoyage: " + idVoyage);
+    if (idVoyage != null) {
+        // Recherche du voyage dans la base
+        voyage = voyageRepository.findById(idVoyage.longValue()).orElse(null);
+    }
+
+    // Appel du service pour récupérer les diffusions filtrées par voyage et date
+    List<DiffusionPubliciteVoyage> diffusions =
+            publiciteService.getDiffusionsByVoyage(voyage, start, end);
+
+    // Calcul du tarif pour chaque diffusion filtrée
+    diffusions.forEach(d -> {
+        TarifPublicite tarif = tarifPubliciteRepository.findTarifApplicable(d.getDateDiffusion().toLocalDate());
+        if (tarif != null) {
+            d.setTarifMontant(tarif.getMontant());
+        }
+    });
+
+    return diffusions;
+}
+
+
+
+
 
 }

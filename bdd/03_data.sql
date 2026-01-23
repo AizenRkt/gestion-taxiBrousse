@@ -1,5 +1,5 @@
 INSERT INTO arret (nom) VALUES('Antananarivo');
-INSERT INTO arret (nom) VALUES('Tamatave');
+INSERT INTO arret (nom) VALUES('Toamasina');
 INSERT INTO arret (nom) VALUES('Majunga');
 INSERT INTO arret (nom) VALUES('Fianaratsoa');
 INSERT INTO arret (nom) VALUES('Diego');
@@ -12,6 +12,7 @@ INSERT INTO vehicule (immatriculation, marque, capacite_passager, date_mise_en_s
 INSERT INTO vehicule (immatriculation, marque, capacite_passager, date_mise_en_service) VALUES('A003', 'rdn', 18, '2026-01-01');
 INSERT INTO vehicule (immatriculation, marque, capacite_passager, date_mise_en_service) VALUES('A004', 'rdn', 10, '2026-01-01');
 INSERT INTO vehicule (immatriculation, marque, capacite_passager, date_mise_en_service) VALUES('A005', 'rdn', 19, '2026-01-01');
+INSERT INTO vehicule (immatriculation, marque, capacite_passager, date_mise_en_service) VALUES('1244TBK', 'rdn', 20, '2026-01-01');
 
 INSERT INTO chauffeur (nom, prenom, date_de_naissance) VALUES('Rasoa', 'Jean', '1980-05-15');
 INSERT INTO chauffeur (nom, prenom, date_de_naissance) VALUES('Rakoto', 'Paul', '1975-09-20');
@@ -21,17 +22,26 @@ INSERT INTO chauffeur (nom, prenom, date_de_naissance) VALUES('Rasolofonirina', 
 
 -- données de trajet
 INSERT INTO trajet (code_trajet, description) 
-VALUES ('T001', 'Trajet principal entre Antananarivo et Tamatave');
+VALUES ('T001', 'Trajet principal entre Antananarivo et Toamasina');
 
 INSERT INTO trajet_arret (id_trajet, id_arret, ordre) VALUES (1, 1, 1); -- Antananarivo
-INSERT INTO trajet_arret (id_trajet, id_arret, ordre) VALUES (1, 2, 2); -- Tamatave
+INSERT INTO trajet_arret (id_trajet, id_arret, ordre) VALUES (1, 2, 2); -- Toamasina
 
 INSERT INTO trajet_tarif (id_trajet, montant, date_tarif)
 VALUES (1, 30000, '2024-01-01');
 
 -- donées de voyage 
 INSERT INTO voyage (id_trajet, id_vehicule, id_chauffeur, date_depart, date_arrivee)
-VALUES (1, 1, 1, '2024-07-01 08:00:00', '2024-07-01 18:00:00');
+VALUES (1, 6, 1, '2026-01-20 10:00:00', '2024-01-21 10:00:00'),
+ (1, 6, 1, '2026-01-21 10:00:00', '2026-01-21 15:00:00'),
+(1, 6, 1, '2026-01-21 15:00:00', '2026-01-22 15:00:00');
+
+
+
+
+
+
+
 
 INSERT INTO place_type (libelle) VALUES ('économique'), ('premium'), ('VIP');
 INSERT INTO remise_type (libelle) VALUES('POURCENTAGE'), ('MONTANT_FIXE');
@@ -74,64 +84,83 @@ INSERT INTO vehicule_place (id_vehicule, id_place, id_place_type) VALUES
 
 -- données aléa 
 -- enfant
-INSERT INTO remise (id_type_remise, libelle, valeur, date_debut)
-VALUES (2, 'Tarif enfant économique', 40000, '2026-01-01');
-INSERT INTO remise_condition (id_remise, champ, operateur, valeur)
+-- INSERT INTO remise (id_type_remise, libelle, valeur, date_debut)
+-- VALUES (2, 'Tarif enfant économique', 40000, '2026-01-01');
+-- INSERT INTO remise_condition (id_remise, champ, operateur, valeur)
+-- VALUES
+-- (1, 'passager_type', '=', 'enfant'),
+-- (1, 'place_type', '=', 'économique');
+
+
+-- INSERT INTO remise (id_type_remise, libelle, valeur, date_debut)
+-- VALUES (2, 'Tarif enfant premium', 50000, '2026-01-01');
+-- INSERT INTO remise_condition (id_remise, champ, operateur, valeur)
+-- VALUES
+-- (2, 'passager_type', '=', 'enfant'),
+-- (2, 'place_type', '=', 'premium');
+
+
+-- INSERT INTO remise (id_type_remise, libelle, valeur, date_debut)
+-- VALUES (2, 'Tarif enfant VIP', 65000, '2026-01-01');
+-- INSERT INTO remise_condition (id_remise, champ, operateur, valeur)
+-- VALUES
+-- (3, 'passager_type', '=', 'enfant'),
+-- (3, 'place_type', '=', 'VIP');
+
+-- -- senior 
+-- INSERT INTO remise (id_type_remise, libelle, valeur, date_debut)
+-- VALUES (1, 'Remise senior 20%', 20, '2026-01-01');
+-- INSERT INTO remise_condition (id_remise, champ, operateur, valeur)
+-- VALUES
+-- (4, 'passager_type', '=', 'senior');
+
+--reservation
+INSERT INTO reservation (client_nom, client_tel, id_voyage, nombre_places, total_payer)
 VALUES
-(1, 'passager_type', '=', 'enfant'),
-(1, 'place_type', '=', 'économique');
+('Rakoto', '0341234567', 1, 40, 0),
+('Rabe',   '0339876543', 2, 30, 0),
+('Jean',   '0321112222', 3, 50, 0);
 
 
-INSERT INTO remise (id_type_remise, libelle, valeur, date_debut)
-VALUES (2, 'Tarif enfant premium', 50000, '2026-01-01');
-INSERT INTO remise_condition (id_remise, champ, operateur, valeur)
+INSERT INTO reservation_detail 
+(id_reservation, id_place_type, id_passager_type, prix_applique, nombre_places)
 VALUES
-(2, 'passager_type', '=', 'enfant'),
-(2, 'place_type', '=', 'premium');
+-- Réservation 1 : 2 adultes en place normale
+(1, 1, 1, 50000, 40),
 
+-- Réservation 2 : 1 adulte en VIP
+(2, 1, 1, 50000, 30),
 
-INSERT INTO remise (id_type_remise, libelle, valeur, date_debut)
-VALUES (2, 'Tarif enfant VIP', 65000, '2026-01-01');
-INSERT INTO remise_condition (id_remise, champ, operateur, valeur)
-VALUES
-(3, 'passager_type', '=', 'enfant'),
-(3, 'place_type', '=', 'VIP');
+-- Réservation 3 : 2 adultes + 1 enfant
 
--- senior 
-INSERT INTO remise (id_type_remise, libelle, valeur, date_debut)
-VALUES (1, 'Remise senior 20%', 20, '2026-01-01');
-INSERT INTO remise_condition (id_remise, champ, operateur, valeur)
-VALUES
-(4, 'passager_type', '=', 'senior');
-
+(3, 1, 1, 50000, 50);
 
 --publicite
 INSERT INTO societe (nom) VALUES
-('Société Alpha'),
-('Société Beta'),
-('Société Gamma');
+('vaniala'),
+('Lewis'),
+('Jejoo'),
+('Socobis');
 
 INSERT INTO publicite (id_societe, code, description, duree) VALUES
-(1, 'PUB-ALPHA-01', 'Publicité pour le nouveau produit Alpha', 30),
-(1, 'PUB-ALPHA-02', 'Promotion spéciale', 45),
-(2, 'PUB-BETA-01', 'Publicité pour les services Beta', 60),
-(3, 'PUB-GAMMA-01', 'Campagne de lancement Gamma', 25);
+(1, 'PUB-vaniala-01', 'Publicité pour le nouveau produit vaniala', 30),
+(2, 'PUB-lewis-01', 'Promotion spéciale', 45),
+(4, 'PUB-socobis-01', 'Publicité pour les services socobis', 60),
+(4, 'PUB-socobis-02', 'Publicité pour les services socobis', 60),
+(3, 'PUB-Jejoo-01', 'Campagne de lancement Jejoo', 25);
 
 
 INSERT INTO diffusion_publicite_voyage (id_publicite, id_voyage, date_diffusion) VALUES
-(1, 1, '2026-01-01 08:00:00'),
-(1, 1, '2026-01-20 08:00:00'),
-(1, 1, '2026-01-21 14:30:00'),
-(2, 1, '2026-01-22 09:15:00'),
-(3, 1, '2026-01-23 11:00:00'),
-(4, 1, '2026-01-24 16:45:00');
+(1, 1, '2026-01-20 10:00:00'),
+(2, 1, '2026-01-20 10:00:00'),
+(3, 2, '2026-01-21 10:00:00'),
+(4, 2, '2026-01-21 10:00:00'),
+(5, 2, '2026-01-21 10:00:00');
+-- (4, 1, '2026-01-24 16:45:00');
 
 
 INSERT INTO tarif_publicite (montant, date_modif) VALUES
-(1000.00, '2026-01-01'),
-(1200.50, '2026-01-10'),
-(1500.75, '2026-01-15'),
-(2000.00, '2026-01-20');
+(200, '2026-01-01');
 
 -- alea reste à payer 
-INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(1, 2000, '2026-01-12');
+-- INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(1, 2000, '2026-01-12');

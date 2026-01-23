@@ -6,7 +6,7 @@ import com.example.gestion.model.tarif.TarifPublicite;
 import com.example.gestion.repository.publicite.PubliciteRepository;
 import com.example.gestion.repository.publicite.TarifPubliciteRepository;
 import org.springframework.stereotype.Service;
-
+import com.example.gestion.model.voyage.Voyage;
 import com.example.gestion.repository.publicite.PaiementPubliciteRepository;
 import com.example.gestion.model.publicite.PaiementPublicite;
 
@@ -90,6 +90,35 @@ public class PubliciteService {
 
         return caMensuel.subtract(totalPaiements);
     }
+
+
+//   public List<DiffusionPubliciteVoyage> getAllDiffusionsByVoyage(int annee, int mois, Integer idVoyage) {
+//     List<DiffusionPubliciteVoyage> all = diffusionRepository.findAllDiffusions();
+
+//     return all.stream()
+//         // Filtre par voyage si idVoyage fourni
+//         .filter(d -> idVoyage == null || (d.getVoyage() != null && d.getVoyage().getIdVoyage().equals(idVoyage)))
+        
+//         // Filtre par année et mois
+//         .filter(d -> {
+//             LocalDateTime diffDate = d.getDateDiffusion();
+//             return diffDate.getYear() == annee && diffDate.getMonthValue() == mois;
+//         })
+//         .toList();
+// }
+
+     
+    public List<DiffusionPubliciteVoyage> getDiffusionsByVoyage(Voyage voyage, LocalDateTime start, LocalDateTime end) {
+        List<DiffusionPubliciteVoyage> all = diffusionRepository.findAllDiffusions();
+
+        return all.stream()
+                .filter(d -> d.getVoyage().equals(voyage))
+                .filter(d -> start == null || (d.getDateDiffusion().compareTo(start) >= 0
+                        && d.getDateDiffusion().compareTo(end) < 0))
+                .toList();
+    }
+
+
 
 
 }

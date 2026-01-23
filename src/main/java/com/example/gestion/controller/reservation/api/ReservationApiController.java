@@ -7,7 +7,7 @@ import com.example.gestion.service.voyage.VoyageService;
 import com.example.gestion.dto.reservation.ReservationRequestDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.List;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -63,6 +63,24 @@ public class ReservationApiController {
 
     //     return ResponseEntity.ok(saved);
     // }
+ @GetMapping("/caByVoyage")
+public ResponseEntity<BigDecimal> getCAVoyage(
+        @RequestParam Integer idVoyage) {
+
+    if (idVoyage == null) {
+        return ResponseEntity.badRequest().body(BigDecimal.ZERO);
+    }
+
+    // Récupère toutes les réservations pour ce voyage
+    List<Reservation> reservations = reservationService.findAllWithDetailsByVoyage(idVoyage);
+
+    // Calcule le chiffre d'affaires via la méthode getCAVoyage
+    BigDecimal caTotal = reservationService.getCAVoyage(reservations);
+
+    return ResponseEntity.ok(caTotal);
+}
+
+
 
 
 }

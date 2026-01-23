@@ -11,7 +11,6 @@ import com.example.gestion.model.reservation.Reservation;
 import com.example.gestion.model.reservation.ReservationDetail;
 import com.example.gestion.model.place.PlaceType;
 import com.example.gestion.model.client.PassagerType;
-
 import com.example.gestion.dto.reservation.ReservationRequestDTO;
 
 import com.example.gestion.service.tarif.TarificationService;
@@ -52,6 +51,7 @@ public class ReservationService {
     public List<Reservation> findAllWithDetails() {
         return reservationRepo.findAllWithDetails();
     }
+
 
     public Optional<Reservation> findById(Long id) {
         return reservationRepo.findById(id);
@@ -162,6 +162,44 @@ public class ReservationService {
         // Sauvegarde finale : Hibernate gère les détails grâce au cascade
         return reservationRepo.save(res);
     }
+    
+    public List<Reservation> findAllWithDetailsByVoyage(Integer idVoyage) {
+        if (idVoyage == null) {
+            // Si aucun voyage spécifié, retourne toutes les réservations
+            return reservationRepo.findAllWithDetails();
+        }
+
+        Long idVoyageLong = idVoyage.longValue();
+
+        // Sinon, on filtre par idVoyage
+        return reservationRepo.findAllWithDetails()
+                            .stream()
+                            .filter(r -> r.getVoyage() != null 
+                                    && r.getVoyage().getIdVoyage().equals(idVoyageLong))
+                            .toList();
+    }
+
+        public BigDecimal getCAVoyage(List<Reservation> reservations) {
+            BigDecimal caTotal = BigDecimal.ZERO;
+
+            for (Reservation reservation : reservations) {
+                if (reservation.getDetails() == null) continue;
+
+                for (ReservationDetail detail : reservation.getDetails()) {
+                    PlaceType placeType = detail.getPlaceType();
+                    PassagerType passagerType = detail.getPassagerType();
+                    Integer nombrePlaces = detail.getNombrePlaces();
+
+                    if (placeType != null && passagerType != null && nombrePlaces != null) {
+                        BigDecimal prixUnitaire = tarificationService.calculerPrix(placeType, passagerType);
+                        BigDecimal montant = prixUnitaire.multiply(BigDecimal.valueOf(nombrePlaces));
+                        caTotal = caTotal.add(montant);
+                    }
+                }
+            }
+
+            return caTotal;
+        }
 
 
 }
