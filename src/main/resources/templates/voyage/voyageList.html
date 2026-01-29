@@ -64,7 +64,7 @@
                     </div>
 
                     <div class="card-body">
-
+                            
                         <!-- Loader -->
                         <div id="loading-spinner" class="text-center py-5">
                             <div class="spinner-border text-primary" role="status"></div>
@@ -79,11 +79,13 @@
                                 <th>Arrêts</th>
                                 <th>Véhicule</th>
                                 <th>Montant genere par ticket</th>
-                                <th>Mnotant genere par diffusion de pubicite</th>
-                                <th>Montant de CA total</th>
+                                <th>Montant genere par diffusion de pubicite</th>
+                                <th>Montant généré produits</th>
                                 <th>Montant paye total diffusion</th>
                                 <th>Reste a payer total diffusion</th>
-                                
+                                <th>Montant de CA total theorique</th>
+                                <!-- <th>Montant de CA total reel</th> -->
+
 
                             </tr>
                             </thead>
@@ -173,9 +175,21 @@ async function loadVoyages() {
                     } catch (err) {
                         console.error("Erreur récupération montant payé diffusion pour voyage", v.idVoyage, err);
                     }
+                // Récupérer le CA généré par les produits
+                let caProduits = 0;
+                try {
+                    const prodRes = await fetch(`/api/produits/caByVoyage?idVoyage=${v.idVoyage}`);
+                    if (prodRes.ok) {
+                        caProduits = await prodRes.json();
+                    }
+                } catch (err) {
+                    console.error("Erreur récupération CA produits pour voyage", v.idVoyage, err);
+                }
 
                 // Calcul du CA total
-                const caTotal = caTickets + caPub;
+                const caTotal = caTickets + caPub + caProduits;
+                const caReel = caTickets + montantPaye + caProduits;
+
 
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
@@ -192,11 +206,15 @@ async function loadVoyages() {
                         ${v.vehicule.immatriculation}
                     </td>
                     <td>${caTickets ? caTickets.toFixed(2) : "0.00"}</td> <!-- CA tickets -->
-                    <td>${caPub ? caPub.toFixed(2) : "0.00"}</td>          <!-- CA publicités -->
-                    <td>${caTotal.toFixed(2)}</td>             
+                    <td>${caPub ? caPub.toFixed(2) : "0.00"}</td>          
+                    <td>${caProduits ? caProduits.toFixed(2) : "0.00"}</td> <!-- CA produits -->
+                    <!-- CA publicités -->
                     <td>${montantPaye ? montantPaye.toFixed(2) : "0.00"}</td> <!-- Montant payé total diffusion -->
-            <!-- CA total -->
+                    <!-- CA total -->
                     <td>${caPub - montantPaye}</td>          <!-- CA publicités -->
+                    <td>${caTotal.toFixed(2)}</td>               
+                                        // Montant total reelle
+                    <!--<td>${caReel.toFixed(2)}</td> -->              
                     
                 `;
                 tbody.appendChild(tr);

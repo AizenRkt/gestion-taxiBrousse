@@ -6,8 +6,6 @@
 --     t.description,
 --     STRING_AGG(a.nom, ' → ' ORDER BY ta.ordre) AS itineraire
 -- FROM trajet t
--- INNER JOIN trajet_arret ta 
---     ON t.id_trajet = ta.id_trajet
 -- INNER JOIN arret a 
 --     ON ta.id_arret = a.id_arret
 -- GROUP BY 

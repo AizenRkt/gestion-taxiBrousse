@@ -162,9 +162,25 @@ INSERT INTO diffusion_publicite_voyage (id_publicite, id_voyage, date_diffusion)
 INSERT INTO tarif_publicite (montant, date_modif) VALUES
 (100000, '2026-01-01');
 
-alea reste à payer 
+-- alea reste à payer 
 INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(1, 50000, '2026-01-13');
-INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(2, 200, '2026-01-14');
-INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(4, 400, '2026-01-14');
-INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(3, 200, '2026-01-14');
-INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(3, 200, '2026-01-14');
+-- INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(2, 200, '2026-01-14');
+-- INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(4, 400, '2026-01-14');
+-- INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(3, 200, '2026-01-14');
+-- INSERT INTO paiement_publicite (id_societe, montant, date_paiement) VALUES(3, 200, '2026-01-14');
+
+INSERT INTO produit (nom, code) VALUES
+('Eau minérale', 'EAU01');
+
+INSERT INTO produit_prix (id_produit, prix, date_modif) VALUES
+(1, 5000,  '2026-01-01');
+
+INSERT INTO vente_produit (id_produit, nbr_produit_vendu, id_reservation) VALUES
+(1, 20, 1);  -- 20 eaux
+
+
+INSERT INTO vente_produit (id_produit, nbr_produit_vendu, id_reservation) VALUES
+(1, 1, 1);  -- 20 eaux
+
+INSERT INTO vente_produit (id_produit, nbr_produit_vendu, id_reservation) VALUES
+(1, 1, 2);  -- 20 eaux

@@ -171,3 +171,23 @@ CREATE TABLE paiement_publicite (
     montant DECIMAL(10,2) NOT NULL,
     date_paiement DATE NOT NULL
 );
+
+CREATE TABLE produit(
+    id_produit SERIAL PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    code VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE vente_produit(
+    id_vente_produit SERIAL PRIMARY KEY,
+    id_produit INT REFERENCES produit(id_produit),
+    nbr_produit_vendu INT NOT NULL,
+    id_reservation INT REFERENCES reservation(id_reservation)
+);
+
+CREATE TABLE produit_prix(
+    id_produit_prix SERIAL PRIMARY KEY,
+    id_produit INT REFERENCES produit(id_produit),
+    prix DECIMAL(10,2) NOT NULL,
+    date_modif DATE NOT NULL
+);
